@@ -51,7 +51,10 @@ class Recorder(Receiver):
         stream = self.stream(callback=audio_callback, **self.additional_args, channels=1)
         print("opening stream")
         with stream:
-            self.listener.wait()
+            # Wait for the listener to tell us we need to stop recording
+            while not self.listener.wait():
+                pass
+
         print("done with stream")
 
 class Listener(object):
@@ -112,12 +115,17 @@ class SocketReceiver(Receiver):
 
 class AudioVisualizer(Listener):
     """GUI Visualizer for audio data"""
-    def __init__(self, samplerate, duration=200.0, interval=30.0, downsample=1, blocking=False):
+    def __init__(self, samplerate, duration=200.0, interval=30.0, downsample=1, blocking_time=None):
         self.samplerate = samplerate
         self.duration = duration
         self.interval = interval
         self.downsample = downsample
-        self.blocking = blocking
+        self.blocking_time = blocking_time
+        if self.blocking_time is None:
+            self.blocking = True
+        else:
+            self.blocking = False
+        self.did_show = False
         self.q = queue.Queue()
 
         self.length = int(self.duration * self.samplerate / (1000 * self.downsample))
@@ -147,8 +155,14 @@ class AudioVisualizer(Listener):
         self.q.put(data[::self.downsample])
 
     def wait(self):
-        print("showing plt, terminal will now stop until plot window is closed")
-        plt.show(block=self.blocking)
+        if not self.did_show:
+            plt.show(block=self.blocking)
+            self.did_show = True
+        else:
+            plt.pause(self.blocking_time)
+        if plt.get_fignums():
+            return False
+        return True
 
     def update_plot(self, frame):
         while True:
@@ -236,7 +250,7 @@ def record(args):
 
 def record_and_visualize(args):
     additional_args = {"samplerate":16000.0, "blocksize":1024}
-    listener = AudioVisualizer(samplerate = additional_args["samplerate"], blocking=True)
+    listener = AudioVisualizer(samplerate = additional_args["samplerate"], blocking_time=None)
     receiver = Recorder(listener, additional_args)
     receiver.listen()
 
