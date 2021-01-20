@@ -7,14 +7,14 @@ import sounddevice as sd
 import argparse
 import sys
 
-# For data visualizer only
+# For data visualizer
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import numpy as np
 import queue
 import struct
 
-# For socket only
+# For socket
 import socket
 import select
 
@@ -89,15 +89,15 @@ class SocketSender(Listener):
                 self.socket = None
 
     def wait(self):
+        # Because no data should be received in this socket,
+        # this actually just waits for the other end of the socket to close
         if self.timeout is not None:
-            sd.sleep(int(self.timeout * 1000))
+            select.select([self.socket], [], [], self.timeout)
         else:
-            # Because no data should be received in this socket,
-            # this actually just waits for the other end of the socket to close
             select.select([self.socket], [], [])
-            self.socket.close()
-            self.socket = None
-            print("socket was ready to read")
+        self.socket.close()
+        self.socket = None
+        print("socket was ready to read")
         return True
 
 
@@ -120,16 +120,21 @@ class SocketReceiver(Receiver):
         self.listening_socket.close()
 
     def listen(self):
-        while not self.listener.wait():
+        while not self.listener.wait() and self.socket is not None:
             # Read the data from the socket in blocks
             current_data = []
             remaining_len = self.blocksize * self.typesize
-            while remaining_len != 0:
+            while remaining_len != 0 and self.socket is not None:
                 current_data.append(self.socket.recv(remaining_len))
                 remaining_len -= len(current_data[-1])
+                if len(current_data[-1]) == 0:
+                    self.socket.close()
+                    self.socket = None
             total_data = b"".join(current_data)
             self.listener.data_ready(total_data)
-        self.socket.close()
+        if self.socket is not None:
+            self.socket.close()
+            self.socket = None
 
 class AudioVisualizer(Listener):
     """GUI Visualizer for audio data"""
@@ -258,14 +263,14 @@ def record(args):
     # additional_args = ready_arguments(args)
     # address = ready_address(args)
     # listener = SocketSender(address, args.timeout)
-    # recorder = Recorder(listener, additional_args)
-    # recorder.listen()
+    # receiver = Recorder(listener, additional_args)
+    # receiver.listen()
 
     additional_args = {"samplerate":16000.0, "blocksize":1024}
     address = ("127.0.0.1", 35852)
-    listener = SocketSender(address, timeout=None)
-    recorder = Recorder(listener, additional_args)
-    recorder.listen()
+    listener = SocketSender(address, timeout=3.1) # timeout can be any float, or None for unlimited time
+    receiver = Recorder(listener, additional_args)
+    receiver.listen()
 
 def record_and_visualize(args):
     additional_args = {"samplerate":16000.0, "blocksize":1024}
