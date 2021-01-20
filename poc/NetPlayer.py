@@ -16,6 +16,7 @@ import struct
 
 # For socket only
 import socket
+import select
 
 class Receiver(object):
     """Abstract receiver class to receive audio from a device"""
@@ -77,7 +78,15 @@ class SocketSender(Listener):
         self.socket.connect((self.dest))
 
     def data_ready(self, data):
-        self.socket.send(data)
+        while data:
+            if self.socket is None:
+                break
+            sent_len = self.socket.send(data)
+            data = data[sent_len:]
+            if sent_len == 0:
+                print("sent 0 bytes")
+                self.socket.close()
+                self.socket = None
 
     def wait(self):
         if self.timeout is not None:
@@ -85,8 +94,12 @@ class SocketSender(Listener):
         else:
             # Because no data should be received in this socket,
             # this actually just waits for the other end of the socket to close
-            self.socket.recv(1)
+            select.select([self.socket], [], [])
             self.socket.close()
+            self.socket = None
+            print("socket was ready to read")
+        return True
+
 
 
 class SocketReceiver(Receiver):
@@ -104,7 +117,7 @@ class SocketReceiver(Receiver):
         self.listening_socket.listen(1)
         self.socket, remote_addr = self.listening_socket.accept()
         print("got connection from", remote_addr)
-        #self.listening_socket.close()
+        self.listening_socket.close()
 
     def listen(self):
         while not self.listener.wait():
@@ -116,6 +129,7 @@ class SocketReceiver(Receiver):
                 remaining_len -= len(current_data[-1])
             total_data = b"".join(current_data)
             self.listener.data_ready(total_data)
+        self.socket.close()
 
 class AudioVisualizer(Listener):
     """GUI Visualizer for audio data"""
@@ -249,7 +263,7 @@ def record(args):
 
     additional_args = {"samplerate":16000.0, "blocksize":1024}
     address = ("127.0.0.1", 35852)
-    listener = SocketSender(address, timeout=100)
+    listener = SocketSender(address, timeout=None)
     recorder = Recorder(listener, additional_args)
     recorder.listen()
 
@@ -275,8 +289,6 @@ def main(args):
         record_and_visualize(args)
     if args.netvisualize:
         recv_and_visualize(args)
-
-    print(args)
 
 if __name__ == '__main__':
     args = parse_arguments()
