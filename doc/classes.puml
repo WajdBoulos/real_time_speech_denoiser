@@ -1,0 +1,54 @@
+@startuml
+
+title Classes
+
+
+class Receiver {
+  abstract class to receive audio from a device
+  +listen()
+}
+
+class Listener {
+  abstract class to listen to audio from a receiver
+  +data_ready()
+  +wait()
+}
+
+class Recorder implements Receiver {
+  receive audio from microphone
+}
+
+class SocketReceiver implements Receiver {
+  receive audio from a socket
+}
+class FilePlayer implements Receiver {
+  receive audio from a file
+}
+
+
+class SocketSender implements Listener {
+  send audio over socket
+}
+
+class AudioVisualizer implements Listener {
+  nice GUI to show audio waves
+}
+
+class Player implements Listener {
+  play audio over speakers
+}
+
+class SaveToFile implements Listener {
+  save audio to a file
+}
+
+class Splitter implements Listener {
+  Split audio to two listeners
+}
+
+Receiver ---> Listener
+note on link
+  listen will call data_ready for every sample block
+end note
+
+@enduml
