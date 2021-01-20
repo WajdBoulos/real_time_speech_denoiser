@@ -91,7 +91,7 @@ class SocketSender(Listener):
 
 class SocketReceiver(Receiver):
     """Receive audio from a socket and send each block of samples to a listener"""
-    def __init__(self, listener, address, blocksize, typesize=8):
+    def __init__(self, listener, address, blocksize, typesize=4):
         self.listener = listener
         self.address = address
         self.blocksize = blocksize
@@ -107,15 +107,19 @@ class SocketReceiver(Receiver):
         #self.listening_socket.close()
 
     def listen(self):
-        # Read the data from the socket in blocks
-        current_data = []
-        remaining_len = self.blocksize * typesize
-        while remaining_len != 0:
-            current_data.append(self.socket.recv(remaining_len))
+        while not self.listener.wait():
+            # Read the data from the socket in blocks
+            current_data = []
+            remaining_len = self.blocksize * self.typesize
+            while remaining_len != 0:
+                current_data.append(self.socket.recv(remaining_len))
+                remaining_len -= len(current_data[-1])
+            total_data = b"".join(current_data)
+            self.listener.data_ready(total_data)
 
 class AudioVisualizer(Listener):
     """GUI Visualizer for audio data"""
-    def __init__(self, samplerate, duration=200.0, interval=30.0, downsample=1, blocking_time=None):
+    def __init__(self, samplerate, duration=200.0, interval=30.0, downsample=1, blocking_time=None, typesize=4):
         self.samplerate = samplerate
         self.duration = duration
         self.interval = interval
@@ -126,6 +130,7 @@ class AudioVisualizer(Listener):
         else:
             self.blocking = False
         self.did_show = False
+        self.typesize = typesize
         self.q = queue.Queue()
 
         self.length = int(self.duration * self.samplerate / (1000 * self.downsample))
@@ -149,8 +154,8 @@ class AudioVisualizer(Listener):
         
         old_data = data
         data = np.zeros((1024, 1), dtype=np.float32)
-        for i in range(0, len(old_data), 4):
-            data[i//4] = struct.unpack('f', old_data[i:i+4])[0]
+        for i in range(0, len(old_data), self.typesize):
+            data[i//self.typesize] = struct.unpack('f', old_data[i:i+self.typesize])[0]
 
         self.q.put(data[::self.downsample])
 
@@ -244,7 +249,7 @@ def record(args):
 
     additional_args = {"samplerate":16000.0, "blocksize":1024}
     address = ("127.0.0.1", 35852)
-    listener = SocketSender(address)
+    listener = SocketSender(address, timeout=100)
     recorder = Recorder(listener, additional_args)
     recorder.listen()
 
@@ -256,9 +261,8 @@ def record_and_visualize(args):
 
 def recv_and_visualize(args):
     additional_args = {"samplerate":16000.0, "blocksize":1024}
-    # listener = AudioVisualizer(samplerate = additional_args["samplerate"], blocking=False)
-    # recorder = Recorder(listener, additional_args)
-    receiver = SocketReceiver(None, ("127.0.0.1", 35852), blocksize=additional_args["blocksize"])
+    listener = AudioVisualizer(samplerate = additional_args["samplerate"], blocking_time=0.01)
+    receiver = SocketReceiver(listener, ("127.0.0.1", 35852), blocksize=additional_args["blocksize"])
     receiver.listen()
 
 def main(args):
