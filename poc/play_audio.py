@@ -27,7 +27,7 @@ def play_file(file_stream, sample_rate=None):
 
 def main():
     file_to_read = "test.audio"
-    sample_rate = 44100
+    sample_rate = 16000
 
     with open(file_to_read, "rb") as f:
         play_file(f, sample_rate)

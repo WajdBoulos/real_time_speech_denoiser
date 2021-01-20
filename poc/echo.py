@@ -27,10 +27,10 @@ def capture_and_play(duration, use_numpy, sample_rate=None):
 def main():
     duration = 20 # seconds
     use_numpy = True
-    #  sample_rate = 16000 # This one does not work!
+    sample_rate = 16000
     #  sample_rate = 48000
     #  sample_rate = 44100
-    sample_rate = None
+    # sample_rate = None
     capture_and_play(duration, use_numpy, sample_rate)
 
 if '__main__' == __name__:

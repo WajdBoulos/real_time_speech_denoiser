@@ -30,9 +30,9 @@ def capture_to_file(file_stream, duration, use_numpy=False, sample_rate=None):
 
 def main():
     file_to_write_to = "test.audio"
-    duration = 10 # Seconds
+    duration = 5 # Seconds
     use_numpy = False
-    sample_rate = 44100
+    sample_rate = 16000
 
     with open(file_to_write_to, "wb") as f:
         capture_to_file(f, duration, use_numpy, sample_rate)
