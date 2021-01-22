@@ -152,7 +152,7 @@ class AudioVisualizer(Listener):
         self.typesize = typesize
         self.q = queue.Queue()
 
-        self.length = int(self.duration * self.samplerate / (1000 * self.downsample))
+        self.length = int(self.duration * self.samplerate / (self.downsample))
         self.plotdata = np.zeros((self.length, 1))
         fig, ax = plt.subplots()
         self.lines = ax.plot(self.plotdata)
@@ -268,7 +268,7 @@ def record(args):
 
     additional_args = {"samplerate":16000.0, "blocksize":1024}
     address = ("127.0.0.1", 35852)
-    listener = SocketSender(address, timeout=3.1) # timeout can be any float, or None for unlimited time
+    listener = SocketSender(address, timeout=None) # timeout can be any float, or None for unlimited time
     receiver = Recorder(listener, additional_args)
     receiver.listen()
 
@@ -280,7 +280,7 @@ def record_and_visualize(args):
 
 def recv_and_visualize(args):
     additional_args = {"samplerate":16000.0, "blocksize":1024}
-    listener = AudioVisualizer(samplerate = additional_args["samplerate"], blocking_time=0.01)
+    listener = AudioVisualizer(samplerate = additional_args["samplerate"], blocking_time=0.01, duration=1, interval=30)
     receiver = SocketReceiver(listener, ("127.0.0.1", 35852), blocksize=additional_args["blocksize"])
     receiver.listen()
 
