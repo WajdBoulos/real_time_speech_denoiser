@@ -2,8 +2,9 @@
 
 """ Read audio data from a microphone.
 """
+from __future__ import absolute_import
 
-from reader import Reader
+from .reader import Reader
 import sounddevice as sd
 import sys
 

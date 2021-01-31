@@ -1,6 +1,11 @@
 # real_time_speech_denoiser
 Real time application to show speech denoising in action.
 
+# Running the library
+To run an example, be in the home directory of this project, and run
+```python -m src.real_time_noise_processing.main.run```
+and add any other parameters to it.
+
 # Implementation details
 
 - I decided to use the python package sounddevice to capture and play audio.
@@ -11,7 +16,7 @@ Real time application to show speech denoising in action.
   - Another reason I chose this library, is that it is cross-platform.
 
 # Things to consider
-- Consider adding a call such as writer.finish for when there is no more data to read (like when a socket is closed).
+- Consider adding a call such as writer.finish for when there is no more data to read (like when a socket is closed). This will give the writer time to finalize anything it needs (like send all the data it has buffered, or display a message, or close a file).
 
 # TODO
 - [x] Change class names from Receiver to Reader and Listener to Writer
@@ -20,9 +25,9 @@ Real time application to show speech denoising in action.
 - [ ] Add option to make the wait function of SocketWriter not block
 - [ ] Create FileReader (FilePlayer in class diagram)
 - [ ] Create FileWriter (SaveToFile in class diagram)
-- [ ] Create Processor Listener (Gets a Processor and a Listener, and puts everything it gets through the processor and sends it’s output to the listener)
-- [ ] Create Splitter Listener (can be created by a Splitter Processor)
-- [ ] Create Player Listener
+- [ ] Create Processor Writer (Gets a Processor and a Writer, and puts everything it gets through the processor and sends its output to the Writer)
+- [ ] Create Splitter Writer (can be created by a Splitter Processor)
+- [ ] Create Player Writer
 - [ ] Create sequence diagram
 - [ ] Tidy up code
 - [ ] Add docstring to everything in the code

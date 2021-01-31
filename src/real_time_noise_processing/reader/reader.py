@@ -2,6 +2,7 @@
 
 """ Read audio data from an input device and send it to be written
 """
+from __future__ import absolute_import
 
 class Reader(object):
     """Abstract reader class to read audio from any input device"""

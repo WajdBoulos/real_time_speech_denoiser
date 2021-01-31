@@ -2,7 +2,10 @@
 
 """ Write audio data to a socket.
 """
-from writer import Writer
+
+from __future__ import absolute_import
+
+from .writer import Writer
 import socket
 import select
 

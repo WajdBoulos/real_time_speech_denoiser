@@ -2,7 +2,9 @@
 
 """ Show GUI window with visualization of audio data.
 """
-from writer import Writer
+from __future__ import absolute_import
+
+from .writer import Writer
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import numpy as np

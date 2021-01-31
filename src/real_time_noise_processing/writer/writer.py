@@ -3,6 +3,8 @@
 """ Write audio data to an output device.
 """
 
+from __future__ import absolute_import
+
 class Writer(object):
     """Abstract writer class to write audio data gotten from a reader."""
 
