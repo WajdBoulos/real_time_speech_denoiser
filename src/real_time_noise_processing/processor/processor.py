@@ -11,7 +11,7 @@ class Processor(object):
     Processor Writers can be chained for more complex processing.
     """
 
-    def Process(self, data):
+    def process(self, data):
         """Process a block of data.
         A Processor Writer should call this function for every block of data.
         This function should always return data with the same size as the data it gets.
