@@ -14,14 +14,15 @@ import time
 
 class SpeakerPlayer(Writer):
     """Get audio data from a reader and play it on speakers"""
-    def __init__(self, timeout=None, additional_args=None):
-        self.timeout = timeout
-
+    def __init__(self, timeout=0.1, additional_args=None,):
         self.additional_args = {}
         if additional_args is not None:
             self.additional_args = additional_args
 
         self.q = queue.Queue()
+
+        self.did_start_playing = False
+        self.timeout = timeout
 
         # Start playback
         self.start_stream()
@@ -45,12 +46,16 @@ class SpeakerPlayer(Writer):
         self.q.put(data)
 
     def wait(self):
-        print("opening output stream")
-        self.stream.__enter__()
-        try:
-            while True:
-                time.sleep(10)
-        finally:
-            print("closing output stream")
-            self.stream.__exit__()
-        return True
+        if not self.did_start_playing:
+            self.did_start_playing = True
+            print("opening output stream, send ctrl-c to stop")
+            self.stream.__enter__()
+        else:
+            # Sleep, and exit if we get a keyboard interrupt
+            try:
+                time.sleep(self.timeout)
+            except KeyboardInterrupt:
+                print("closing output stream")
+                self.stream.__exit__()
+                return True
+        return False
