@@ -42,16 +42,15 @@ class SpeakerPlayer(Writer):
         self.stream = sd.RawOutputStream(callback=audio_callback, **self.additional_args, channels=1)
 
     def data_ready(self, data):
-        """Add the audio samples data to queue, to be consumed by update_plot every time we need to update the plot.
-        This function converts the audio to numpy array before adding it to the queue.
-
-        Args:
-            data (buffer):        data to write. It is a buffer with length of blocksize*sizeof(dtype).
-        """
         self.q.put(data)
 
     def wait(self):
-        with self.stream:
+        print("opening output stream")
+        self.stream.__enter__()
+        try:
             while True:
                 time.sleep(10)
+        finally:
+            print("closing output stream")
+            self.stream.__exit__()
         return True

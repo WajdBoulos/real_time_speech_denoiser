@@ -17,6 +17,7 @@ and add any other parameters to it.
 
 # Things to consider
 - Consider adding a call such as writer.finish for when there is no more data to read (like when a socket is closed). This will give the writer time to finalize anything it needs (like send all the data it has buffered, or display a message, or close a file).
+- Consider changing the reader/writer design to a more general observer design (use https://refactoring.guru/design-patterns/observer/python/example for a good example of how to do this correctly)
 
 # TODO
 - [x] Change class names from Receiver to Reader and Listener to Writer

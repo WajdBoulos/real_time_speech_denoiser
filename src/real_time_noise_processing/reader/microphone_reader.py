@@ -56,10 +56,10 @@ class MicrophoneReader(Reader):
         stream = self.stream(callback=audio_callback, **self.additional_args, channels=1)
         
         # Open the stream and start to record audio
-        print("opening stream")
+        print("opening input stream")
         with stream:
             # Wait for the writer to tell us we need to stop recording
             while not self.writer.wait():
                 pass
 
-        print("done with stream")
+        print("done with input stream")
