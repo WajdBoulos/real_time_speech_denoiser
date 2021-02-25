@@ -27,7 +27,7 @@ and add any other parameters to it.
 - [ ] Create FileWriter (SaveToFile in class diagram)
 - [ ] Create Processor Writer (Gets a Processor and a Writer, and puts everything it gets through the processor and sends its output to the Writer)
 - [ ] Create Splitter Writer (can be created by a Splitter Processor)
-- [ ] Create Player Writer
+- [x] Create Player Writer
 - [ ] Create sequence diagram
 - [ ] Tidy up code
 - [ ] Add docstring to everything in the code

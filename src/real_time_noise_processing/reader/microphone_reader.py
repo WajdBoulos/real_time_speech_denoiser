@@ -23,7 +23,9 @@ class MicrophoneReader(Reader):
 
         """
         self.writer = writer
-        self.additional_args = additional_args
+        self.additional_args = {}
+        if additional_args is not None:
+            self.additional_args = additional_args
 
         # Use a raw python buffer stream (and not a numpy array)
         self.stream = sd.RawInputStream
