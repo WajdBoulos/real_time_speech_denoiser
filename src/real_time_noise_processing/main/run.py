@@ -37,10 +37,13 @@ def initialize_objects(object_list):
 
     # writer = known_writers["speaker_player"](additional_args={"samplerate":16000.0, "blocksize":1024})
     writer1 = known_writers["speaker_player"](blocking_time=0.01, additional_args={"samplerate":16000.0, "blocksize":1024})
-    writer2 = known_writers["audio_visualizer"](**{"samplerate":16000.0, "blocking_time":0.01, "duration":1})
-    processor1 = known_processors["splitter"]([writer2])
-    writer3 = known_writers["processor_writer"](processor=processor1, writer=writer1)
-    reader = known_readers["microphone_reader"](writer3, additional_args={"samplerate":16000.0, "blocksize":1024})
+    writer2 = known_writers["speaker_player"](blocking_time=0.01, additional_args={"samplerate":16000.0, "blocksize":1024})
+    writer3 = known_writers["audio_visualizer"](**{"samplerate":16000.0, "blocking_time":0.01, "duration":1})
+    writer4 = known_writers["audio_visualizer"](**{"samplerate":16000.0, "blocking_time":0.01, "duration":5})
+    writer5 = known_writers["audio_visualizer"](**{"samplerate":16000.0, "blocking_time":0.01, "duration":10, "downsample":100})
+    processor1 = known_processors["splitter"]([writer1, writer3, writer4, writer5])
+    writer6 = known_writers["processor_writer"](processor=processor1, writer=writer2)
+    reader = known_readers["microphone_reader"](writer6, additional_args={"samplerate":16000.0, "blocksize":1024})
     reader.read()
 
 def main():
