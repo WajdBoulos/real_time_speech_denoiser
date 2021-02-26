@@ -13,7 +13,7 @@ from ..writer.audio_visualizer import AudioVisualizer
 from ..writer.speaker_player import SpeakerPlayer
 from ..writer.processor_writer import ProcessorWriter
 
-from ..processor.processor import Processor #TODO: Delete me!
+from ..processor.splitter import Splitter
 
 known_readers = {
                     "microphone_reader":MicrophoneReader,
@@ -26,7 +26,7 @@ known_writers = {
                     "processor_writer":ProcessorWriter,
                 }
 known_processors = {
-                    "processor":Processor, #TODO: Delete me!
+                    "splitter":Splitter,
                     }
 
 def initialize_objects(object_list):
@@ -36,10 +36,11 @@ def initialize_objects(object_list):
     #     reader.read()
 
     # writer = known_writers["speaker_player"](additional_args={"samplerate":16000.0, "blocksize":1024})
-    writer1 = known_writers["speaker_player"](additional_args={"samplerate":16000.0, "blocksize":1024})
-    processor1 = known_processors["processor"]()
-    writer2 = known_writers["processor_writer"](processor=processor1, writer=writer1)
-    reader = known_readers["microphone_reader"](writer2, additional_args={"samplerate":16000.0, "blocksize":1024})
+    writer1 = known_writers["speaker_player"](blocking_time=0.01, additional_args={"samplerate":16000.0, "blocksize":1024})
+    writer2 = known_writers["audio_visualizer"](**{"samplerate":16000.0, "blocking_time":0.01, "duration":1})
+    processor1 = known_processors["splitter"]([writer2])
+    writer3 = known_writers["processor_writer"](processor=processor1, writer=writer1)
+    reader = known_readers["microphone_reader"](writer3, additional_args={"samplerate":16000.0, "blocksize":1024})
     reader.read()
 
 def main():

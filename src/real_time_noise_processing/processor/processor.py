@@ -23,3 +23,16 @@ class Processor(object):
             in place inside the buffer.
         """
         pass
+
+    def wait(self):
+        """Run time to process any data.
+        A Processor Writer should call this function when it is okay to take more time to run.
+
+        A processor should not use the process function for a long time, and should do most of the heavy
+        processing in this function instead. Note that there is no guarantee about the frequency of calls
+        to this function in relation to the process function.
+        
+        Returns:
+            True if we need to stop the program, False otherwise.
+        """
+        pass

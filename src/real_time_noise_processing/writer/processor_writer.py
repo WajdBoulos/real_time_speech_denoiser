@@ -14,4 +14,7 @@ class ProcessorWriter(Writer):
         self.writer.data_ready(data)
 
     def wait(self):
-    	return self.writer.wait()
+        status = self.processor.wait()
+        # status must be after self.writer.wait(), to make sure that even if status is true, self.writer.wait() is still called.
+        status = self.writer.wait() or status
+        return status

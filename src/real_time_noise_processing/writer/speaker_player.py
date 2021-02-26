@@ -14,7 +14,7 @@ import time
 
 class SpeakerPlayer(Writer):
     """Get audio data from a reader and play it on speakers"""
-    def __init__(self, timeout=0.1, additional_args=None,):
+    def __init__(self, blocking_time=0.1, additional_args=None,):
         self.additional_args = {}
         if additional_args is not None:
             self.additional_args = additional_args
@@ -22,7 +22,7 @@ class SpeakerPlayer(Writer):
         self.q = queue.Queue()
 
         self.did_start_playing = False
-        self.timeout = timeout
+        self.blocking_time = blocking_time
 
         # Start playback
         self.start_stream()
@@ -31,12 +31,12 @@ class SpeakerPlayer(Writer):
 
         def audio_callback(outdata, frames, time, status):
             if status.output_underflow:
-                print('Output underflow: increase blocksize?', file=sys.stderr)
+                print('Output underflow', file=sys.stderr)
                 return
             try:
                 data = self.q.get_nowait()
             except queue.Empty as e:
-                print('Buffer is empty: increase buffersize?', file=sys.stderr)
+                print('Buffer is empty', file=sys.stderr)
                 return
             outdata[:] = data
 
@@ -53,7 +53,7 @@ class SpeakerPlayer(Writer):
         else:
             # Sleep, and exit if we get a keyboard interrupt
             try:
-                time.sleep(self.timeout)
+                time.sleep(self.blocking_time)
             except KeyboardInterrupt:
                 print("closing output stream")
                 self.stream.__exit__()
