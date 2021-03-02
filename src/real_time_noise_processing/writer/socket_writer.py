@@ -63,17 +63,19 @@ class SocketWriter(Writer):
 
         This function blocks, so this writer should not be used when the reader runs in the main thread only.
         Returns:
-            Always True.
+            True if the socket was closed, False otherwise.
         """
         # Because no data should be received in this socket,
         # this actually just waits for the other end of the socket to close
         if self.timeout is not None:
             # Wait for the socket to close or a maximum time
-            select.select([self.socket], [], [], self.timeout)
+            ready_read, _, _ = select.select([self.socket], [], [], self.timeout)
         else:
             # Wait for the socket to close
-            select.select([self.socket], [], [])
-        self.socket.close()
-        self.socket = None
-        print("socket was ready to read")
-        return True
+            ready_read, _, _ = select.select([self.socket], [], [])
+        if ready_read:
+            self.socket.close()
+            self.socket = None
+            print("socket was ready to read")
+            return True
+        return False

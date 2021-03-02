@@ -5,9 +5,12 @@ Real time application to show speech denoising in action.
 To run an example, be in the home directory of this project, and run
 ```python -m src.real_time_noise_processing.main.run -f src\real_time_noise_processing\main\echo_visualizer.yaml```
 and add any other parameters to it.
-If you want to run an example using a socket, first start in one terminal:
+If you want to run a complex example using a socket tunnel, first start in one terminal:
 ```python -m src.real_time_noise_processing.main.run -f src\real_time_noise_processing\main\socket_visualizer_player.yaml```
-and then in another terminal:
+and then in a second terminal:
+```python -m src.real_time_noise_processing.main.run -f src\real_time_noise_processing\main\socket_multiply_socket.yaml```
+(this will open a window in the first terminal, which will be unresponsive until the next line runs)
+and finally in a third terminal:
 ```python -m src.real_time_noise_processing.main.run -f src\real_time_noise_processing\main\microphone_to_socket.yaml```
 
 # Implementation details
@@ -26,8 +29,8 @@ and then in another terminal:
 # TODO
 - [x] Change class names from Receiver to Reader and Listener to Writer
 - [x] Move code to separate files outside of POC
-- [ ] Add CLI script to run the different modes of operation
-- [ ] Add option to make the wait function of SocketWriter not block
+- [x] Add CLI script to run the different modes of operation
+- [x] Add option to make the wait function of SocketWriter not block
 - [ ] Create FileReader (FilePlayer in class diagram)
 - [ ] Create FileWriter (SaveToFile in class diagram)
 - [x] Create Processor Writer (Gets a Processor and a Writer, and puts everything it gets through the processor and sends its output to the Writer)

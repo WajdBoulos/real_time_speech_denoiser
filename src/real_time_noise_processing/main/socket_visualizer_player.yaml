@@ -1,7 +1,6 @@
 {
-    "reader": {"type":"socket_reader", "args":{"address":["127.0.0.1", 35852], "blocksize":1024}},
+    "reader": {"type":"socket_reader", "args":{"address":["127.0.0.1", 35853], "blocksize":1024}},
     "pipeline": [
-      {"type":"multiplier", "args":{"factor":2, "sample_size":4}},
     ],
     "writers": [
         {"type":"speaker_player", "args":{"blocking_time":0.01, "additional_args":{"samplerate":16000.0, "blocksize":1024}}},

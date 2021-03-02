@@ -19,7 +19,8 @@ class Writer(object):
         than wait().
 
         Args:
-            data (buffer):        data to write. It is a buffer with length of blocksize*sizeof(dtype).
+            data (buffer):        data to write. It is a buffer with length of blocksize*sizeof(dtype). To replace 
+                a byte in this buffer, use ```data[start_index:end_index]=X``` where X is a bytes object.
         """
         pass
 
