@@ -36,7 +36,7 @@ class SocketWriter(Writer):
         After this function returns, self.socket should be a socket connected to a socket reader.
         """
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((self.dest))
+        self.socket.connect(tuple(self.dest))
 
     def data_ready(self, data):
         """Send data to the remote socket.

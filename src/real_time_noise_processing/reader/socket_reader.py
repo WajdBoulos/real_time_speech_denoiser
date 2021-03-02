@@ -35,7 +35,7 @@ class SocketReader(Reader):
         After this function returns, self.socket should be a socket connected to a socket writer.
         """
         self.listening_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.listening_socket.bind((self.address))
+        self.listening_socket.bind(tuple(self.address))
         self.listening_socket.listen(1)
         self.socket, remote_addr = self.listening_socket.accept()
         print("got connection from", remote_addr)
@@ -61,7 +61,7 @@ class SocketReader(Reader):
                     self.socket = None
 
             # Join the data to one buffer and send it to the writer.
-            total_data = b"".join(current_data)
+            total_data = bytearray(b"".join(current_data))
             self.writer.data_ready(total_data)
 
         if self.socket is not None:

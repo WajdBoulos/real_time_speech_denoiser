@@ -5,6 +5,10 @@ Real time application to show speech denoising in action.
 To run an example, be in the home directory of this project, and run
 ```python -m src.real_time_noise_processing.main.run -f src\real_time_noise_processing\main\echo_visualizer.yaml```
 and add any other parameters to it.
+If you want to run an example using a socket, first start in one terminal:
+```python -m src.real_time_noise_processing.main.run -f src\real_time_noise_processing\main\socket_visualizer_player.yaml```
+and then in another terminal:
+```python -m src.real_time_noise_processing.main.run -f src\real_time_noise_processing\main\microphone_to_socket.yaml```
 
 # Implementation details
 

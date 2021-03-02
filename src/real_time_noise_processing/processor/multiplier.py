@@ -16,7 +16,7 @@ class Multiplier(Processor):
             sample *= self.factor
             sample_bytes = struct.pack('f', sample)
             for j, value in enumerate(sample_bytes):
-                data[i + j] = bytes([value])
+                data[i + j:i + j + 1] = bytes([value])
 
     def wait(self):
         # Never finish
