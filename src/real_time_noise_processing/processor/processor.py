@@ -19,8 +19,7 @@ class Processor(object):
         Args:
             data (buffer):        data to process. It is a buffer with length of blocksize*sizeof(dtype).
         Returns:
-            Processed data buffer. If this function returns None, it is assumed that the data was processed
-            in place inside the buffer.
+            Nothing. changes the data in place inside the data buffer.
         """
         pass
 

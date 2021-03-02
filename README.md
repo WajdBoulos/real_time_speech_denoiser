@@ -26,8 +26,8 @@ and add any other parameters to it.
 - [ ] Add option to make the wait function of SocketWriter not block
 - [ ] Create FileReader (FilePlayer in class diagram)
 - [ ] Create FileWriter (SaveToFile in class diagram)
-- [ ] Create Processor Writer (Gets a Processor and a Writer, and puts everything it gets through the processor and sends its output to the Writer)
-- [ ] Create Splitter Writer (can be created by a Splitter Processor)
+- [x] Create Processor Writer (Gets a Processor and a Writer, and puts everything it gets through the processor and sends its output to the Writer)
+- [x] Create Splitter Writer (can be created by a Splitter Processor)
 - [x] Create Player Writer
 - [ ] Create sequence diagram
 - [ ] Tidy up code
@@ -38,5 +38,5 @@ and add any other parameters to it.
 - [ ] Simplify gitignore
 - [ ] Make code robust (make sure nothing is hard coded, everything is according to specs, try on different systems, etc)
 - [ ] Change abstract classes to really be abstract (or interfaces if possible)
-- [ ] Make into package (add setyp.py, make imports relative, add tests, etc). Read https://blog.ionelmc.ro/2014/05/25/python-packaging/ and https://github.com/pypa/sampleproject to see what needs to be done.
+- [ ] Make into package (add setup.py, make imports relative, add tests, etc). Read https://blog.ionelmc.ro/2014/05/25/python-packaging/ and https://github.com/pypa/sampleproject to see what needs to be done.
 - [ ] Create Noise Reduction Processor in a different project
