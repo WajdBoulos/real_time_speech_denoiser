@@ -3,7 +3,7 @@ Real time application to show speech denoising in action.
 
 # Running the library
 To run an example, be in the home directory of this project, and run
-```python -m src.real_time_noise_processing.main.run```
+```python -m src.real_time_noise_processing.main.run -f src\real_time_noise_processing\main\echo_visualizer.yaml```
 and add any other parameters to it.
 
 # Implementation details

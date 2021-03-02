@@ -17,6 +17,9 @@ from ..processor.splitter import Splitter
 from ..processor.pipeline import Pipeline
 from ..processor.multiplier import Multiplier
 
+import argparse
+import yaml
+
 known_readers = {
                     "microphone_reader":MicrophoneReader,
                     "socket_reader":SocketReader,
@@ -63,23 +66,21 @@ def initialize_objects(object_list):
     reader = known_readers[object_list["reader"]["type"]](final_writer, **object_list["reader"]["args"])
     reader.read()
 
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '-f', '--filename', help='setting file with classes to create', required=True)
+    return parser.parse_args()
+
 def main():
     # Read the YAML of objects to create
     # Initialize the objects
     
-    # Placeholder simple reader and writer to test this file
-    classes = {
-        "reader": {"type":"microphone_reader", "args":{"additional_args":{"samplerate":16000.0, "blocksize":1024}}},
-        "pipeline": [
-            {"type":"multiplier", "args":{"factor":1.5, "sample_size":4}},
-        ],
-        "writers": [
-            {"type":"audio_visualizer", "args":{"samplerate":16000.0, "blocking_time":0.001, "duration":1}},
-            {"type":"audio_visualizer", "args":{"samplerate":16000.0, "blocking_time":0.001, "duration":5}},
-            {"type":"audio_visualizer", "args":{"samplerate":16000.0, "blocking_time":0.001, "duration":10, "downsample":100}},
-            {"type":"speaker_player", "args":{"blocking_time":0.01, "additional_args":{"samplerate":16000.0, "blocksize":1024}}},
-        ],
-    }
+    args = parse_arguments()
+
+    with open(args.filename, "r") as f:
+        classes = yaml.load(f, yaml.SafeLoader)
+
     initialize_objects(classes)
 
 if __name__ == '__main__':
