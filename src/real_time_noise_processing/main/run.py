@@ -15,6 +15,7 @@ from ..writer.processor_writer import ProcessorWriter
 
 from ..processor.splitter import Splitter
 from ..processor.pipeline import Pipeline
+from ..processor.multiplier import Multiplier
 
 known_readers = {
                     "microphone_reader":MicrophoneReader,
@@ -29,6 +30,7 @@ known_writers = {
 known_processors = {
                     "splitter":Splitter,
                     "pipeline":Pipeline,
+                    "multiplier":Multiplier
                     }
 
 def initialize_objects(object_list):
@@ -45,8 +47,9 @@ def initialize_objects(object_list):
     writer5 = known_writers["audio_visualizer"](**{"samplerate":16000.0, "blocking_time":0.01, "duration":10, "downsample":100})
     processor1 = known_processors["splitter"]([writer1, writer3])
     processor2 = known_processors["splitter"]([writer4, writer5])
-    processor3 = known_processors["pipeline"]([processor1, processor2])
-    writer6 = known_writers["processor_writer"](processor=processor3, writer=writer2)
+    processor3 = known_processors["multiplier"](0.7)
+    processor4 = known_processors["pipeline"]([processor3, processor1, processor2])
+    writer6 = known_writers["processor_writer"](processor=processor4, writer=writer2)
     reader = known_readers["microphone_reader"](writer6, additional_args={"samplerate":16000.0, "blocksize":1024})
     reader.read()
 
