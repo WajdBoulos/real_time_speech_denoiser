@@ -1,0 +1,12 @@
+{
+    "reader": {"type":"microphone_reader", "args":{"additional_args":{"samplerate":16000.0, "blocksize":1024}}},
+    "pipeline": [
+        {"type":"multiplier", "args":{"factor":1.5, "sample_size":4}},
+    ],
+    "writers": [
+        {"type":"audio_visualizer", "args":{"samplerate":16000.0, "blocking_time":0.001, "duration":1}},
+        {"type":"audio_visualizer", "args":{"samplerate":16000.0, "blocking_time":0.001, "duration":5}},
+        {"type":"audio_visualizer", "args":{"samplerate":16000.0, "blocking_time":0.001, "duration":10, "downsample":100}},
+        {"type":"speaker_player", "args":{"blocking_time":0.01, "additional_args":{"samplerate":16000.0, "blocksize":1024}}},
+    ],
+}

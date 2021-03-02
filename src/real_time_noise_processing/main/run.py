@@ -34,23 +34,33 @@ known_processors = {
                     }
 
 def initialize_objects(object_list):
-    # for reader_name, reader_data in object_list["readers"].items():
-    #     writer = known_writers[reader_data["writer"]["name"]](**reader_data["writer"]["args"])
-    #     reader = known_readers[reader_name](writer, **reader_data["args"])
-    #     reader.read()
+    # Create each of the processors and add them to the pipeline list in order
+    pipeline = []
+    for processor in object_list["pipeline"]:
+        pipeline.append(known_processors[processor["type"]](**processor["args"]))
+    # Create each writer and add them to the list in order (the order should not matter)
+    writers = []
+    for writer in object_list["writers"]:
+        writers.append(known_writers[writer["type"]](**writer["args"]))
 
-    # writer = known_writers["speaker_player"](additional_args={"samplerate":16000.0, "blocksize":1024})
-    writer1 = known_writers["speaker_player"](blocking_time=0.01, additional_args={"samplerate":16000.0, "blocksize":1024})
-    writer2 = known_writers["speaker_player"](blocking_time=0.01, additional_args={"samplerate":16000.0, "blocksize":1024})
-    writer3 = known_writers["audio_visualizer"](**{"samplerate":16000.0, "blocking_time":0.01, "duration":1})
-    writer4 = known_writers["audio_visualizer"](**{"samplerate":16000.0, "blocking_time":0.01, "duration":5})
-    writer5 = known_writers["audio_visualizer"](**{"samplerate":16000.0, "blocking_time":0.01, "duration":10, "downsample":100})
-    processor1 = known_processors["splitter"]([writer1, writer3])
-    processor2 = known_processors["splitter"]([writer4, writer5])
-    processor3 = known_processors["multiplier"](0.7)
-    processor4 = known_processors["pipeline"]([processor3, processor1, processor2])
-    writer6 = known_writers["processor_writer"](processor=processor4, writer=writer2)
-    reader = known_readers["microphone_reader"](writer6, additional_args={"samplerate":16000.0, "blocksize":1024})
+    if len(writers) > 1:
+        # Create a splitter for all the writers
+        splitter_processor = known_processors["splitter"](writers[:-1])
+        # Add the splitter as the last processor in the pipeline (so all the processors that change the data will run before it)
+        pipeline.append(splitter_processor)
+        # Set the final writer as the last writer in the list
+        final_writer = writers[-1]
+    else:
+        # Set the only writer as the final writer (there must be at least one writer)
+        final_writer = writers[0]
+    if len(pipeline) > 0:
+        # Create a pipeline
+        pipeline_processor = known_processors["pipeline"](pipeline)
+        # Replace the final writer with a processor writer that calls the pipeline and then the writer
+        final_writer = known_writers["processor_writer"](pipeline_processor, final_writer)
+
+    # Create the reader coupled to the final writer    
+    reader = known_readers[object_list["reader"]["type"]](final_writer, **object_list["reader"]["args"])
     reader.read()
 
 def main():
@@ -59,15 +69,16 @@ def main():
     
     # Placeholder simple reader and writer to test this file
     classes = {
-        # "readers": {
-        #     "microphone_reader": {
-        #         "args": {"additional_args":{"samplerate":16000.0, "blocksize":1024}},
-        #         "writer": {
-        #             "name":"speaker_player", #"name":"audio_visualizer",
-        #             "args": {"additional_args":{"samplerate":16000.0, "blocksize":1024}},#"args": {"samplerate":16000.0, "blocking_time":None, "duration":1}
-        #         }
-        #     }
-        # }
+        "reader": {"type":"microphone_reader", "args":{"additional_args":{"samplerate":16000.0, "blocksize":1024}}},
+        "pipeline": [
+            {"type":"multiplier", "args":{"factor":1.5, "sample_size":4}},
+        ],
+        "writers": [
+            {"type":"audio_visualizer", "args":{"samplerate":16000.0, "blocking_time":0.001, "duration":1}},
+            {"type":"audio_visualizer", "args":{"samplerate":16000.0, "blocking_time":0.001, "duration":5}},
+            {"type":"audio_visualizer", "args":{"samplerate":16000.0, "blocking_time":0.001, "duration":10, "downsample":100}},
+            {"type":"speaker_player", "args":{"blocking_time":0.01, "additional_args":{"samplerate":16000.0, "blocksize":1024}}},
+        ],
     }
     initialize_objects(classes)
 
