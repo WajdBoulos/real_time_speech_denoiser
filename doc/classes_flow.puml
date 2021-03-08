@@ -1,0 +1,30 @@
+@startuml
+
+reader --> pipeline
+
+reader : microphone_reader
+
+state pipeline {
+    state processor1 : LowPassFilter
+    state processor2 : NoiseReduction
+    state processor3 : VolumeMultiplier
+    state "..." as processor_others
+    processor1 --> processor2
+    processor2 --> processor_others
+    processor_others --> processor3
+}
+
+pipeline --> writers
+
+state writers {
+    state writer1 : speaker_player
+    state writer2 : audio_visualizer
+    state writer3 : file_writer
+    state "..." as writers_others
+    writers --> writer1
+    writers --> writer2
+    writers --> writer3
+    writers --> writers_others
+}
+
+@enduml

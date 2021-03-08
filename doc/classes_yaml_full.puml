@@ -1,0 +1,46 @@
+@startyaml
+reader :
+    type : microphone_reader
+    args :
+        additional_args :
+            samplerate :16000.0
+            blocksize :1024
+pipeline :
+    -
+        type : LowPassFilter
+        args :
+            min_freq : 5000
+            sample_size : 4
+            blocksize : 1024
+    -
+        type : NoiseReduction
+        args :
+            coefficient : 0.7
+            sample_size : 4
+            blocksize :1024
+    -
+        type : VolumeMultiplier
+        args :
+            factor : 2
+            sample_size : 4
+
+writers :
+    -
+        type : speaker_player
+        args :
+            blocking_time :0.01
+            additional_args :
+                samplerate :16000.0
+                blocksize :1024
+    -
+        type : audio_visualizer
+        args :
+            samplerate :16000.0
+            blocking_time :0.001
+            duration :1
+    -
+        type : file_writer
+        args :
+            path : audio.out
+            blocking_time :0.001
+@endyaml
