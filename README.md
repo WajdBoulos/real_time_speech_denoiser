@@ -31,11 +31,13 @@ and finally in a third terminal:
 - [x] Move code to separate files outside of POC
 - [x] Add CLI script to run the different modes of operation
 - [x] Add option to make the wait function of SocketWriter not block
-- [ ] Create FileReader (FilePlayer in class diagram)
-- [ ] Create FileWriter (SaveToFile in class diagram)
+- [x] Create FileReader (FilePlayer in class diagram)
+- [x] Create FileWriter (SaveToFile in class diagram)
 - [x] Create Processor Writer (Gets a Processor and a Writer, and puts everything it gets through the processor and sends its output to the Writer)
 - [x] Create Splitter Writer (can be created by a Splitter Processor)
 - [x] Create Player Writer
+- [ ] Add Finalize call to all writers and processors, to tell them that the input is done and let them finish
+- [ ] Find a way to synchronize the audio of speaker_player and the video of audio_visualizer
 - [ ] Create sequence diagram
 - [ ] Tidy up code
 - [ ] Add docstring to everything in the code

@@ -15,10 +15,6 @@ class SocketWriter(Writer):
         """Initialize a SocketWriter object.
         This writer connects to a remote socket, and sends it every block of data it gets.
 
-        The wait function of this object always blocks, until either the timeout passes or the other end of the socket
-            closes, and in any of those cases the socket is closed and the wait function returns True.
-        This behavior should be changed in the future, to allow running the wait function in non-blocking mode.
-
         Args:
             dest (tuple):           Remote address to connect the socket to. A tuple of (address, port).
             timeout (float):        Maximum time (in seconds) to keep sending data through this socket. After this
@@ -61,7 +57,6 @@ class SocketWriter(Writer):
     def wait(self):
         """Wait for the remote socket to close or the timeout to pass.
 
-        This function blocks, so this writer should not be used when the reader runs in the main thread only.
         Returns:
             True if the socket was closed, False otherwise.
         """

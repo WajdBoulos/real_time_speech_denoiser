@@ -1,0 +1,9 @@
+{
+    "reader": {"type":"file_reader", "args":{"path":"audio.out", "blocksize":1024}},
+    "pipeline": [
+    ],
+    "writers": [
+        {"type":"speaker_player", "args":{"blocking_time":0.01, "additional_args":{"samplerate":16000.0, "blocksize":1024}}},
+        {"type":"audio_visualizer", "args":{"samplerate":16000.0, "blocking_time":0.001, "duration":5}},
+    ],
+}

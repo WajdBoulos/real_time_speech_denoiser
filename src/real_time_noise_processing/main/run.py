@@ -7,11 +7,13 @@ from __future__ import absolute_import
 
 from ..reader.socket_reader import SocketReader
 from ..reader.microphone_reader import MicrophoneReader
+from ..reader.file_reader import FileReader
 
 from ..writer.socket_writer import SocketWriter
 from ..writer.audio_visualizer import AudioVisualizer
 from ..writer.speaker_player import SpeakerPlayer
 from ..writer.processor_writer import ProcessorWriter
+from ..writer.file_writer import FileWriter
 
 from ..processor.splitter import Splitter
 from ..processor.pipeline import Pipeline
@@ -23,12 +25,14 @@ import yaml
 known_readers = {
                     "microphone_reader":MicrophoneReader,
                     "socket_reader":SocketReader,
+                    "file_reader":FileReader,
                 }
 known_writers = {
                     "audio_visualizer":AudioVisualizer,
                     "socket_writer":SocketWriter,
                     "speaker_player":SpeakerPlayer,
                     "processor_writer":ProcessorWriter,
+                    "file_writer":FileWriter,
                 }
 known_processors = {
                     "splitter":Splitter,
