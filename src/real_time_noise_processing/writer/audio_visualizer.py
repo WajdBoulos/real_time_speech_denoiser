@@ -44,8 +44,21 @@ class AudioVisualizer(Writer):
         self.did_show = False
         self.blocksize = blocksize
         self.sample_size = sample_size
+
+        self.initialize_parameters()
+
         self.q = queue.Queue()
         self.initialize_animation()
+
+    def initialize_parameters(self):
+        if self.sample_size == 4:
+            self.unpack_string = "f"
+            self.data_range = (-1, 1)
+        elif self.sample_size == 2:
+            self.unpack_string = "h"
+            self.data_range = (-32768, 32767)
+        else:
+            raise ValueError(f"unsupported sample size {self.sample_size}")
 
     def initialize_animation(self):
         """Initialize parameters for the visualization animation window and set its update function.
@@ -56,7 +69,7 @@ class AudioVisualizer(Writer):
         self.lines = ax.plot(self.plotdata)
 
         # Magic to start an animation. Copied from sounddevice plot_input example.
-        ax.axis((0, len(self.plotdata), -1, 1))
+        ax.axis((0, len(self.plotdata), *self.data_range))
         ax.set_yticks([0])
         ax.yaxis.grid(True)
         ax.tick_params(bottom=False, top=False, labelbottom=False,
@@ -80,7 +93,7 @@ class AudioVisualizer(Writer):
         old_data = data
         data = np.zeros((self.blocksize, 1), dtype=np.float32)
         for i in range(0, len(old_data), self.sample_size):
-            data[i//self.sample_size] = struct.unpack('f', old_data[i:i+self.sample_size])[0]
+            data[i//self.sample_size] = struct.unpack(self.unpack_string, old_data[i:i+self.sample_size])[0]
 
         self.q.put(data[::self.downsample])
 
