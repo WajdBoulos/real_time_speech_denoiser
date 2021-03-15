@@ -1,6 +1,15 @@
 # real_time_speech_denoiser
 Real time application to show speech denoising in action.
 
+# Installing dependencies
+In order to use or run this library, some dependencies must be installed on the system. To install
+them using the package manager conda, follow the instructions written in requirements.txt and create
+a new environment with those packages.
+
+Most of the packages in requirements.txt are not direct dependencies of the project.
+The major dependency of this project is the python-sounddevice package. It can be installed by
+following the directions in https://python-sounddevice.readthedocs.io/en/0.4.1/installation.html
+
 # Running the library
 To run an example, be in the home directory of this project, and run
 ```python -m src.real_time_noise_processing.main.run -f test\config\echo_visualizer.yaml```
