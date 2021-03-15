@@ -71,7 +71,7 @@ class SocketWriter(Writer):
         if ready_read:
             self.socket.close()
             self.socket = None
-            print("socket was ready to read")
+            print("remote socket was closed")
             return True
         return False
 

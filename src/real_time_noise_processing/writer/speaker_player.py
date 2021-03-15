@@ -24,6 +24,7 @@ class SpeakerPlayer(Writer):
         self.event = threading.Event()
         self.empty_buffer_count = 0
         self.max_empty_buffers = max_empty_buffers
+        self.did_get_first_data = False
 
         self.did_start_playing = False
         self.blocking_time = blocking_time
@@ -59,9 +60,12 @@ class SpeakerPlayer(Writer):
 
     def data_ready(self, data):
         self.q.put(data)
+        self.did_get_first_data = True
 
     def wait(self):
-        if not self.did_start_playing:
+        if not self.did_get_first_data:
+            return False
+        elif not self.did_start_playing:
             self.did_start_playing = True
             print("opening output stream, send ctrl-c to stop")
             self.stream.__enter__()
