@@ -54,16 +54,22 @@ class SocketReader(Reader):
             current_data = []
             remaining_len = self.blocksize * self.sample_size
             while remaining_len != 0 and self.socket is not None:
-                current_data.append(self.socket.recv(remaining_len))
-                remaining_len -= len(current_data[-1])
-                if len(current_data[-1]) == 0:
+                try:
+                    current_data.append(self.socket.recv(remaining_len))
+                    remaining_len -= len(current_data[-1])
+                    if len(current_data[-1]) == 0:
+                        self.socket.close()
+                        self.socket = None
+                except ConnectionResetError:
                     self.socket.close()
                     self.socket = None
 
-            # Join the data to one buffer and send it to the writer.
-            total_data = bytearray(b"".join(current_data))
-            self.writer.data_ready(total_data)
+            if remaining_len == 0:
+                # Join the data to one buffer and send it to the writer.
+                total_data = bytearray(b"".join(current_data))
+                self.writer.data_ready(total_data)
 
         if self.socket is not None:
             self.socket.close()
             self.socket = None
+        self.writer.finalize()

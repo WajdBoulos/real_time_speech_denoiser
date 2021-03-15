@@ -19,3 +19,7 @@ class Splitter(Processor):
         for writer in self.writers:
             status = writer.wait() or status
         return status
+
+    def finalize(self):
+        for writer in self.writers:
+            status = writer.finalize()

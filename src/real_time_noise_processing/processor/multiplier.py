@@ -21,3 +21,7 @@ class Multiplier(Processor):
     def wait(self):
         # Never finish
         return False
+
+    def finalize(self):
+        # Nothing to do here
+        return

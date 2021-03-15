@@ -74,3 +74,9 @@ class SocketWriter(Writer):
             print("socket was ready to read")
             return True
         return False
+
+    def finalize(self):
+        # Close the socket to let the socket reader on the other end know that this is the end of the stream
+        if self.socket is not None:
+            self.socket.close()
+            self.socket = None

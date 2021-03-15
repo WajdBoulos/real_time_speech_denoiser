@@ -27,5 +27,11 @@ class FileWriter(Writer):
         except KeyboardInterrupt:
             print("closing output file")
             self.file.close()
+            self.file = None
             return True
         return False
+
+    def finalize(self):
+        if self.file is not None:
+            self.file.close()
+            self.file = None

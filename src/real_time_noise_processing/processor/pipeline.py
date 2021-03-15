@@ -19,3 +19,7 @@ class Pipeline(Processor):
         for processor in self.processors:
             status = processor.wait() or status
         return status
+
+    def finalize(self):
+        for processor in self.processors:
+            processor.finalize()

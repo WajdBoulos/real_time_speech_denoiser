@@ -27,3 +27,4 @@ class FileReader(Reader):
             self.writer.data_ready(data)
         print("closing input file")
         self.file.close()
+        self.writer.finalize()

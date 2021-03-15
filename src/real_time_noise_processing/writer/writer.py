@@ -37,3 +37,16 @@ class Writer(object):
             Note that you should only return True when you never want to get more data to this writer.
         """
         pass
+
+    def finalize(self):
+        """Process any leftover data, and close the writer.
+        This function is only called after all the available data was sent to the writer with calls
+        to data_ready, and the reader is done and want to finish running.
+        In this function the writer should finish processing any leftover data it saved for itself,
+        clean and close any leftover resources, and once it returns the program will be closed.
+        This function is called in the same thread as the wait function, and the writer can take as long 
+        as it needs to finish processing the data.
+        This function will be called even if the writer chooses to finish the run by returning True in
+        the wait function.
+        """
+        pass

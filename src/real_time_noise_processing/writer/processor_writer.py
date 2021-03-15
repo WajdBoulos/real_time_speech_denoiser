@@ -18,3 +18,7 @@ class ProcessorWriter(Writer):
         # status must be after self.writer.wait(), to make sure that even if status is true, self.writer.wait() is still called.
         status = self.writer.wait() or status
         return status
+
+    def finalize(self):
+        self.processor.finalize()
+        self.writer.finalize()

@@ -35,3 +35,6 @@ class Processor(object):
             True if we need to stop the program, False otherwise.
         """
         pass
+
+    def finalize(self):
+        pass

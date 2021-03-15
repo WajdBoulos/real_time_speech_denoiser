@@ -3,15 +3,15 @@ Real time application to show speech denoising in action.
 
 # Running the library
 To run an example, be in the home directory of this project, and run
-```python -m src.real_time_noise_processing.main.run -f src\real_time_noise_processing\main\echo_visualizer.yaml```
+```python -m src.real_time_noise_processing.main.run -f test\config\echo_visualizer.yaml```
 and add any other parameters to it.
 If you want to run a complex example using a socket tunnel, first start in one terminal:
-```python -m src.real_time_noise_processing.main.run -f src\real_time_noise_processing\main\socket_visualizer_player.yaml```
+```python -m src.real_time_noise_processing.main.run -f test\config\socket_visualizer_player.yaml```
 and then in a second terminal:
-```python -m src.real_time_noise_processing.main.run -f src\real_time_noise_processing\main\socket_multiply_socket.yaml```
+```python -m src.real_time_noise_processing.main.run -f test\config\socket_multiply_socket.yaml```
 (this will open a window in the first terminal, which will be unresponsive until the next line runs)
 and finally in a third terminal:
-```python -m src.real_time_noise_processing.main.run -f src\real_time_noise_processing\main\microphone_to_socket.yaml```
+```python -m src.real_time_noise_processing.main.run -f test\config\microphone_to_socket.yaml```
 
 # Implementation details
 
@@ -36,7 +36,8 @@ and finally in a third terminal:
 - [x] Create Processor Writer (Gets a Processor and a Writer, and puts everything it gets through the processor and sends its output to the Writer)
 - [x] Create Splitter Writer (can be created by a Splitter Processor)
 - [x] Create Player Writer
-- [ ] Add Finalize call to all writers and processors, to tell them that the input is done and let them finish
+- [x] Add finalize() call to all writers and processors, to tell them that the input is done and let them finish
+- [ ] Change the initialization of all the writers to only start on the first call to wait(). For example the speaker_player should only start the output stream after the first call to wait(), to make sure there won't be too many callbacks that will get an empty buffer if it takes time from when initializing the class to running it. 
 - [ ] Find a way to synchronize the audio of speaker_player and the video of audio_visualizer
 - [ ] Create sequence diagram
 - [ ] Tidy up code

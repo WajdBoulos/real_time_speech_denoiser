@@ -13,7 +13,7 @@ import struct
 
 class AudioVisualizer(Writer):
     """GUI Visualizer for audio data"""
-    def __init__(self, samplerate, duration=200.0, interval=30.0, downsample=1, blocking_time=None, blocksize=1024, sample_size=4):
+    def __init__(self, samplerate, duration=200.0, interval=30.0, downsample=1, blocking_time=None, blocksize=1024, sample_size=4, wait_for_plot=False):
         """Initialize an AudioVisualizer object.
         This writer opens a GUI window, and shows an interactive visualization of the audio data it gets in real time.
 
@@ -44,6 +44,7 @@ class AudioVisualizer(Writer):
         self.did_show = False
         self.blocksize = blocksize
         self.sample_size = sample_size
+        self.wait_for_plot = wait_for_plot
 
         self.initialize_parameters()
 
@@ -129,3 +130,9 @@ class AudioVisualizer(Writer):
         for column, line in enumerate(self.lines):
             line.set_ydata(self.plotdata[:, column])
         return self.lines
+
+    def finalize(self):
+        if self.wait_for_plot:
+            while plt.get_fignums():
+                plt.pause(self.blocking_time)
+

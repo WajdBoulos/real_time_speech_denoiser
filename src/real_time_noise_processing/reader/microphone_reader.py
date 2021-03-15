@@ -61,5 +61,5 @@ class MicrophoneReader(Reader):
             # Wait for the writer to tell us we need to stop recording
             while not self.writer.wait():
                 pass
-
         print("done with input stream")
+        self.writer.finalize()

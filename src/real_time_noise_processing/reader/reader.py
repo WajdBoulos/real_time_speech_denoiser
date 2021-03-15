@@ -20,6 +20,11 @@ class Reader(object):
         in this function, call writer.data_ready, and then call writer.wait to give the writer time
         to process the new data (and in this case writer.wait should not block for more than a minimal
         amount of time - 10 to 100 ms should be fine).
+        If the data the reader reads has some maximal size (be it a finite file, a socket that is closed,
+        or the user asks that the reader finish), after all the data was sent to the writer with calls
+        to writer.data_ready, the reader must call writer.finalize to notify the writer that no new data
+        is about to arrive. The call to finalize should be made from the same thread as the calls to
+        writer.wait.
         The data passed to writer.data_ready should be of a type that is compatible to a bytearray,
         so that the line ```data[0:1]=b"a"``` will replace the first byte with the byte 'a'.
         """
