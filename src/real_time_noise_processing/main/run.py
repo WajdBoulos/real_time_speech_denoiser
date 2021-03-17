@@ -18,6 +18,7 @@ from ..writer.file_writer import FileWriter
 from ..processor.splitter import Splitter
 from ..processor.pipeline import Pipeline
 from ..processor.multiplier import Multiplier
+from ..processor.dccrn_processor import DCCRNProcessor
 
 import argparse
 import yaml
@@ -37,7 +38,8 @@ known_writers = {
 known_processors = {
                     "splitter":Splitter,
                     "pipeline":Pipeline,
-                    "multiplier":Multiplier
+                    "multiplier":Multiplier,
+                    "DCCRN_processor":DCCRNProcessor,
                     }
 
 def initialize_objects(object_list):
