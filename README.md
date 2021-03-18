@@ -47,6 +47,7 @@ and finally in a third terminal:
 - [x] Create Player Writer
 - [x] Add finalize() call to all writers and processors, to tell them that the input is done and let them finish
 - [x] Change the initialization of speaker player to only start after we get the first bit of data to the writer, so it will not self terminate before it got any data.
+- [ ] Add utils module and implement function to convert from data to samples array and back, and change the implementation of all the processors and writers that do this themselves to use this (audio_visualizer, multiplier, dccrn_processor)
 - [ ] Find a way to synchronize the audio of speaker_player and the video of audio_visualizer
 - [ ] Create sequence diagram
 - [ ] Tidy up code

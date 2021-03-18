@@ -9,6 +9,9 @@ from .writer import Writer
 import time
 
 class FileWriter(Writer):
+    """
+    @note The file created by this writer is not a wav file, it is a file with the raw samples only.
+    """
     def __init__(self, path, blocking_time=0.1):
         self.path = path
         self.blocking_time = blocking_time
