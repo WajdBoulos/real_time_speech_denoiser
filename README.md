@@ -29,6 +29,7 @@ and finally in a third terminal:
 
 # Things to consider
 - Consider changing the reader/writer design to a more general observer design (use https://refactoring.guru/design-patterns/observer/python/example for a good example of how to do this correctly)
+- Consider changing the interface to always use numpy arrays and never raw samples in a buffer. This will change the data to always use the more optimized array type, and will require less conversions, as most objects can work with a numpy array or the raw samples, some can only work with numpy arrays, and only the sockets can work only with the raw data. This will move from a bytes object of raw data to a numpy float32 array, and will require changing every object that currently uses raw bytes to use the numpy option. This includes using the regular streams instead of the raw stream in sounddevice, the regular read instead of the buffer_read in soundfile, will remove the need for the conversions in the audio_visualizer and the dccrn_processor and the multiplier, and will add the need for a conversion only in the socket_reader and socket_writer.
 
 # TODO
 - [x] Change class names from Receiver to Reader and Listener to Writer
@@ -45,8 +46,7 @@ and finally in a third terminal:
 - [x] Create requirements.txt with sections for visualizer / sounddevice / etc
 - [x] Add a call such as writer.finish for when there is no more data to read (like when a socket is closed). This will give the writer time to finalize anything it needs (like send all the data it has buffered, or display a message, or close a file).
 - [x] Create Noise Reduction Processor
-- [ ] Create a wav file reader and writer (or add the needed flags and code to the current file reader and writer), using the example of play_long_file from sounddevice
-- [ ] Change the interface between the readers and the writers to use numpy array of floats instead of a raw data array. This will require a change of all the objects that use sounddevice to use the numpy stream instead of the raw stream, and require every object that currently uses a bytearray of raw data to use a numpyarray of floats instead.
+- [x] Create a wav file reader and writer (or add the needed flags and code to the current file reader and writer), using the example of play_long_file from sounddevice
 - [ ] Add utils module and implement function to convert from data to samples array and back, and change the implementation of all the processors and writers that do this themselves to use this (audio_visualizer, multiplier, dccrn_processor)
 - [ ] Make the run script easier to run (require less dots in the name - by exposing it directly from the __init__.py script in the src folder, with a good name)
 - [ ] Add docstring to everything in the code

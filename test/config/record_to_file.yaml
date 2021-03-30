@@ -3,6 +3,6 @@
     "pipeline": [
     ],
     "writers": [
-        {"type":"file_writer", "args":{"path":"audio.out", "blocking_time":0.01}},
+        {"type":"file_writer", "args":{"path":"out.wav", "blocking_time":0.01}},
     ],
 }

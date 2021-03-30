@@ -1,5 +1,5 @@
 {
-    "reader": {"type":"file_reader", "args":{"path":"audio.out", "blocksize":1024}},
+    "reader": {"type":"file_reader", "args":{"path":"test/wav/test3.wav", "blocksize":1024}},
     "pipeline": [
     ],
     "writers": [
