@@ -36,11 +36,12 @@ class SpeakerPlayer(Writer):
     def start_stream(self):
 
         def audio_callback(outdata, frames, timings, status):
-            if status.output_underflow:
+            if status:
                 if self.verbose:
-                    print('Output underflow', file=sys.stderr)
-                outdata[:] = b"\x00"*len(outdata)
-                return
+                    print("SpeakerPlayer callback status:", status, file=sys.stderr)
+                if status.output_underflow:
+                    outdata[:] = b"\x00"*len(outdata)
+                    return
             try:
                 data = self.q.get_nowait()
                 self.empty_buffer_count = 0

@@ -11,7 +11,7 @@ import sys
 class MicrophoneReader(Reader):
     """Record audio from the microphone and send each block of samples to a writer.
     """
-    def __init__(self, writer, additional_args):
+    def __init__(self, writer, additional_args=None, verbose=False):
         """Initialize a MicrophoneReader object.
         This reader works by using the sound device library to listen to a device.
 
@@ -23,6 +23,7 @@ class MicrophoneReader(Reader):
 
         """
         self.writer = writer
+        self.verbose = verbose
         self.additional_args = {}
         if additional_args is not None:
             self.additional_args = additional_args
@@ -48,8 +49,8 @@ class MicrophoneReader(Reader):
                 stauts (CallbackFlags): Status of the stream. (were there dropped buffers, etc).
 
             """
-            if status:
-                print(status, file=sys.stderr)
+            if status and self.verbose:
+                print("MicrophoneReader callback status:", status, file=sys.stderr)
             self.writer.data_ready(indata)
 
         # Initialize a stream for input.
