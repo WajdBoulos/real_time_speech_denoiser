@@ -3,11 +3,12 @@
 from __future__ import absolute_import
 
 from .processor import Processor
-import struct
 
-import torch
 from ...DCCRN.DCCRN import DCCRN
 from ...DCCRN.utils import remove_pad
+from ..utils.raw_samples_converter import raw_samples_to_array, array_to_raw_samples
+
+import torch
 
 class DCCRNProcessor(Processor):
     def __init__(self, model_path, should_overlap=True, ratio_power=1, sample_size=4):
@@ -22,15 +23,6 @@ class DCCRNProcessor(Processor):
             self.previous_original = None
         self.ratio_power = ratio_power
 
-        if self.sample_size == 4:
-            self.unpack_string = "f"
-            self.should_use_int = False
-        elif self.sample_size == 2:
-            self.unpack_string = "h"
-            self.should_use_int = True
-        else:
-            raise ValueError(f"unsupported sample size {self.sample_size}")
-
     def clean_noise(self, samples):
         estimated_samples = self.model(torch.Tensor([samples]))
         with torch.no_grad():
@@ -39,15 +31,7 @@ class DCCRNProcessor(Processor):
 
     def process(self, data):
         # Get the samples from the data
-        samples = [struct.unpack(self.unpack_string, data[i:i+self.sample_size])[0] for i in range(0, len(data), self.sample_size)]
-
-        def convert_back_samples(clean_samples):
-            for i, clean_sample in zip(range(0, len(data), self.sample_size), clean_samples):
-                if self.should_use_int:
-                    clean_sample = int(clean_sample)
-                clean_sample_bytes = struct.pack(self.unpack_string, clean_sample)
-                for j, value in enumerate(clean_sample_bytes):
-                    data[i + j:i + j + 1] = bytes([value])
+        samples = raw_samples_to_array(data, self.sample_size)
 
         if self.should_overlap:
             if self.previous_original is None:
@@ -55,7 +39,7 @@ class DCCRNProcessor(Processor):
                 self.previous_original = samples
                 self.previous_processed = [0] * len(samples) + list(self.clean_noise(samples))
                 clean_samples = [0] * len(samples)
-                convert_back_samples(clean_samples)
+                array_to_raw_samples(clean_samples, data, self.sample_size)
                 return
             # Process the current samples
             current_processed = self.clean_noise(self.previous_original + samples)
@@ -74,7 +58,7 @@ class DCCRNProcessor(Processor):
             clean_samples = self.clean_noise(samples)
 
         # Convert the samples back to data
-        convert_back_samples(clean_samples)
+        array_to_raw_samples(clean_samples, data, self.sample_size)
 
 
     def wait(self):

@@ -3,7 +3,8 @@
 from __future__ import absolute_import
 
 from .processor import Processor
-import struct
+
+from ..utils.raw_samples_converter import raw_samples_to_array, array_to_raw_samples
 
 class Multiplier(Processor):
     def __init__(self, factor, sample_size=4):
@@ -11,12 +12,9 @@ class Multiplier(Processor):
         self.sample_size = sample_size
 
     def process(self, data):
-        for i in range(0, len(data), self.sample_size):
-            sample = struct.unpack('f', data[i:i+self.sample_size])[0]
-            sample *= self.factor
-            sample_bytes = struct.pack('f', sample)
-            for j, value in enumerate(sample_bytes):
-                data[i + j:i + j + 1] = bytes([value])
+        samples = raw_samples_to_array(data, self.sample_size)
+        samples = [sample * self.factor for sample in samples]
+        array_to_raw_samples(samples, data, self.sample_size)
 
     def wait(self):
         # Never finish

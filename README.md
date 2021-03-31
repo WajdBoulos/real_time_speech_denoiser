@@ -47,7 +47,7 @@ and finally in a third terminal:
 - [x] Add a call such as writer.finish for when there is no more data to read (like when a socket is closed). This will give the writer time to finalize anything it needs (like send all the data it has buffered, or display a message, or close a file).
 - [x] Create Noise Reduction Processor
 - [x] Create a wav file reader and writer (or add the needed flags and code to the current file reader and writer), using the example of play_long_file from sounddevice
-- [ ] Add utils module and implement function to convert from data to samples array and back, and change the implementation of all the processors and writers that do this themselves to use this (audio_visualizer, multiplier, dccrn_processor)
+- [x] Add utils module and implement function to convert from data to samples array and back, and change the implementation of all the processors and writers that do this themselves to use this (audio_visualizer, multiplier, dccrn_processor)
 - [ ] Make the run script easier to run (require less dots in the name - by exposing it directly from the __init__.py script in the src folder, with a good name)
 - [ ] Add docstring to everything in the code
 - [ ] Add details and classes to class diagram

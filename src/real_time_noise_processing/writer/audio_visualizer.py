@@ -5,11 +5,13 @@
 from __future__ import absolute_import
 
 from .writer import Writer
+
+from ..utils.raw_samples_converter import raw_samples_to_array
+
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import numpy as np
 import queue
-import struct
 
 class AudioVisualizer(Writer):
     """GUI Visualizer for audio data"""
@@ -91,11 +93,7 @@ class AudioVisualizer(Writer):
         Args:
             data (buffer):        data to write. It is a buffer with length of blocksize*sizeof(dtype).
         """
-        old_data = data
-        data = np.zeros((self.blocksize, 1), dtype=np.float32)
-        for i in range(0, len(old_data), self.sample_size):
-            data[i//self.sample_size] = struct.unpack(self.unpack_string, old_data[i:i+self.sample_size])[0]
-
+        data = np.array([[i] for i in raw_samples_to_array(data, self.sample_size)])
         self.q.put(data[::self.downsample])
 
     def wait(self):
