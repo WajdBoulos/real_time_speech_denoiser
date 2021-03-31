@@ -1,9 +1,9 @@
 {
-    "reader": {"type":"file_reader", "args":{"path":"audio.out", "blocksize":1024, "sample_size":4}},
+    "reader": {"type":"file_reader", "args":{"path":"test/wav/test3.wav", "blocksize":1024, "sample_size":4}},
     "pipeline": [
         {"type":"DCCRN_processor", "args":{"sample_size":4, "model_path":"models/DCCRN_sr_16k_batch_16_correct_BN_stft_lookahead.pth"}},
     ],
     "writers": [
-        {"type":"file_writer", "args":{"path":"audio2.out", "blocking_time":0.0001}},
+        {"type":"file_writer", "args":{"path":"out.wav", "blocking_time":0.0001}},
     ],
 }
