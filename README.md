@@ -53,7 +53,7 @@ and finally in a third terminal:
 - [ ] Add details and classes to class diagram
 - [ ] Create sequence diagram
 - [ ] Update README with diagrams and startup instructions
-- [ ] Improve the DCCRN processor so that it will use overlapping windows instead of one window, to reduce problems that are caused at the end of the windows.
+- [x] Improve the DCCRN processor so that it will use overlapping windows instead of one window, to reduce problems that are caused at the end of the windows.
 - [ ] Add checks when importing libraries to not fail if a certain library does not exist, and instead just continue and not support the reader/processor/writer that uses this library (maybe even expose some way for the objects to tell which libraries they need, to know if they can be used before actually running them?)
 - [ ] Add some kind of buffering to reading the data in the readers (read some amount of data before starting to pass the data to the writer)
 - [ ] Remove audio files from the repo
