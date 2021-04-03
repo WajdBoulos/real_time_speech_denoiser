@@ -64,14 +64,18 @@ def parse_arguments():
         '-f', '--filename', help='setting file with classes to create', required=True)
     return parser.parse_args()
 
+def load_classes_dict(classes_file_name):
+    with open(classes_file_name, "r") as f:
+        classes = yaml.load(f, yaml.SafeLoader)
+    return classes
+
 def main():
     # Read the YAML of objects to create
     # Initialize the objects
     
     args = parse_arguments()
 
-    with open(args.filename, "r") as f:
-        classes = yaml.load(f, yaml.SafeLoader)
+    classes = load_classes_dict(args.filename)
 
     initialize_objects(classes)
 

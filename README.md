@@ -7,16 +7,16 @@ them using the package manager conda, follow the instructions written in require
 a new environment with those packages.
 
 # Running the library
-To run an example, be in the home directory of this project, and run
-```python -m src.real_time_noise_processing.main.run -f test\config\echo_visualizer.yaml```
+To run an example, be in the home directory of this project (the directory this file is in), and run
+```python -m src.real_time_noise_processing -f test\config\echo_visualizer.yaml```
 and add any other parameters to it.
 If you want to run a complex example using a socket tunnel, first start in one terminal:
-```python -m src.real_time_noise_processing.main.run -f test\config\socket_visualizer_player.yaml```
+```python -m src.real_time_noise_processing -f test\config\socket_visualizer_player.yaml```
 and then in a second terminal:
-```python -m src.real_time_noise_processing.main.run -f test\config\socket_multiply_socket.yaml```
+```python -m src.real_time_noise_processing -f test\config\socket_multiply_socket.yaml```
 (this will open a window in the first terminal, which will be unresponsive until the next line runs)
 and finally in a third terminal:
-```python -m src.real_time_noise_processing.main.run -f test\config\microphone_to_socket.yaml```
+```python -m src.real_time_noise_processing -f test\config\microphone_to_socket.yaml```
 
 # Implementation details
 
@@ -49,7 +49,7 @@ and finally in a third terminal:
 - [x] Create a wav file reader and writer (or add the needed flags and code to the current file reader and writer), using the example of play_long_file from sounddevice
 - [x] Add utils module and implement function to convert from data to samples array and back, and change the implementation of all the processors and writers that do this themselves to use this (audio_visualizer, multiplier, dccrn_processor)
 - [x] Consider not importing anything inside of the run script, to reduce the startup time of the script, and only import an object if it is needed by the current objects used.
-- [ ] Make the run script easier to run (require less dots in the name - by exposing it directly from the __init__.py script in the src folder, with a good name)
+- [x] Make the run script easier to run (require less dots in the name - by exposing it directly from the __init__.py script in the src folder, with a good name)
 - [ ] Split the run script to two parts, one to generate all the reader and writers and export an object from them, and one to run them. This way, the object can have a method to add processors to its pipeline and add writers to its splitter, so it will be easier to import the library and add any needed processor or writer that the run function does not already support.
 - [ ] Add docstring to everything in the code
 - [ ] Add details and classes to class diagram
