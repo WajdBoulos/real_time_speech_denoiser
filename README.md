@@ -50,7 +50,8 @@ and finally in a third terminal:
 - [x] Add utils module and implement function to convert from data to samples array and back, and change the implementation of all the processors and writers that do this themselves to use this (audio_visualizer, multiplier, dccrn_processor)
 - [x] Consider not importing anything inside of the run script, to reduce the startup time of the script, and only import an object if it is needed by the current objects used.
 - [x] Make the run script easier to run (require less dots in the name - by exposing it directly from the __init__.py script in the src folder, with a good name)
-- [ ] Split the run script to two parts, one to generate all the reader and writers and export an object from them, and one to run them. This way, the object can have a method to add processors to its pipeline and add writers to its splitter, so it will be easier to import the library and add any needed processor or writer that the run function does not already support.
+- [x] Split the run script to two parts, one to generate all the reader and writers and export an object from them, and one to run them. This way, the object can have a method to add processors to its pipeline and add writers to its splitter, so it will be easier to import the library and add any needed processor or writer that the run function does not already support.
+- [ ] Rename the library from real_time_noise_processing to real_time_audio_processing
 - [ ] Add docstring to everything in the code
 - [ ] Add details and classes to class diagram
 - [ ] Create sequence diagram
