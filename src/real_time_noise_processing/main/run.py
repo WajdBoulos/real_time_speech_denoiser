@@ -5,56 +5,42 @@
 
 from __future__ import absolute_import
 
-from ..reader.socket_reader import SocketReader
-from ..reader.microphone_reader import MicrophoneReader
-from ..reader.file_reader import FileReader
-
-from ..writer.socket_writer import SocketWriter
-from ..writer.audio_visualizer import AudioVisualizer
-from ..writer.speaker_player import SpeakerPlayer
-from ..writer.processor_writer import ProcessorWriter
-from ..writer.file_writer import FileWriter
-
-from ..processor.splitter import Splitter
-from ..processor.pipeline import Pipeline
-from ..processor.multiplier import Multiplier
-from ..processor.dccrn_processor import DCCRNProcessor
-
+import importlib
 import argparse
 import yaml
 
 known_readers = {
-                    "microphone_reader":MicrophoneReader,
-                    "socket_reader":SocketReader,
-                    "file_reader":FileReader,
+                    "microphone_reader": lambda:importlib.import_module("..reader.microphone_reader", __package__).MicrophoneReader,
+                    "socket_reader": lambda:importlib.import_module("..reader.socket_reader", __package__).SocketReader,
+                    "file_reader": lambda:importlib.import_module("..reader.file_reader", __package__).FileReader,
                 }
 known_writers = {
-                    "audio_visualizer":AudioVisualizer,
-                    "socket_writer":SocketWriter,
-                    "speaker_player":SpeakerPlayer,
-                    "processor_writer":ProcessorWriter,
-                    "file_writer":FileWriter,
+                    "audio_visualizer": lambda:importlib.import_module("..writer.audio_visualizer", __package__).AudioVisualizer,
+                    "socket_writer": lambda:importlib.import_module("..writer.socket_writer", __package__).SocketWriter,
+                    "speaker_player": lambda:importlib.import_module("..writer.speaker_player", __package__).SpeakerPlayer,
+                    "processor_writer": lambda:importlib.import_module("..writer.processor_writer", __package__).ProcessorWriter,
+                    "file_writer": lambda:importlib.import_module("..writer.file_writer", __package__).FileWriter,
                 }
 known_processors = {
-                    "splitter":Splitter,
-                    "pipeline":Pipeline,
-                    "multiplier":Multiplier,
-                    "DCCRN_processor":DCCRNProcessor,
+                    "splitter": lambda:importlib.import_module("..processor.splitter", __package__).Splitter,
+                    "pipeline": lambda:importlib.import_module("..processor.pipeline", __package__).Pipeline,
+                    "multiplier": lambda:importlib.import_module("..processor.multiplier", __package__).Multiplier,
+                    "DCCRN_processor": lambda:importlib.import_module("..processor.dccrn_processor", __package__).DCCRNProcessor,
                     }
 
 def initialize_objects(object_list):
     # Create each of the processors and add them to the pipeline list in order
     pipeline = []
     for processor in object_list["pipeline"]:
-        pipeline.append(known_processors[processor["type"]](**processor["args"]))
+        pipeline.append(known_processors[processor["type"]]()(**processor["args"]))
     # Create each writer and add them to the list in order (the order should not matter)
     writers = []
     for writer in object_list["writers"]:
-        writers.append(known_writers[writer["type"]](**writer["args"]))
+        writers.append(known_writers[writer["type"]]()(**writer["args"]))
 
     if len(writers) > 1:
         # Create a splitter for all the writers
-        splitter_processor = known_processors["splitter"](writers[:-1])
+        splitter_processor = known_processors["splitter"]()(writers[:-1])
         # Add the splitter as the last processor in the pipeline (so all the processors that change the data will run before it)
         pipeline.append(splitter_processor)
         # Set the final writer as the last writer in the list
@@ -64,12 +50,12 @@ def initialize_objects(object_list):
         final_writer = writers[0]
     if len(pipeline) > 0:
         # Create a pipeline
-        pipeline_processor = known_processors["pipeline"](pipeline)
+        pipeline_processor = known_processors["pipeline"]()(pipeline)
         # Replace the final writer with a processor writer that calls the pipeline and then the writer
-        final_writer = known_writers["processor_writer"](pipeline_processor, final_writer)
+        final_writer = known_writers["processor_writer"]()(pipeline_processor, final_writer)
 
     # Create the reader coupled to the final writer    
-    reader = known_readers[object_list["reader"]["type"]](final_writer, **object_list["reader"]["args"])
+    reader = known_readers[object_list["reader"]["type"]]()(final_writer, **object_list["reader"]["args"])
     reader.read()
 
 def parse_arguments():
