@@ -51,14 +51,17 @@ and finally in a third terminal:
 - [x] Consider not importing anything inside of the run script, to reduce the startup time of the script, and only import an object if it is needed by the current objects used.
 - [x] Make the run script easier to run (require less dots in the name - by exposing it directly from the __init__.py script in the src folder, with a good name)
 - [x] Split the run script to two parts, one to generate all the reader and writers and export an object from them, and one to run them. This way, the object can have a method to add processors to its pipeline and add writers to its splitter, so it will be easier to import the library and add any needed processor or writer that the run function does not already support.
-- [ ] Rename the library from real_time_audio_processing to real_time_audio_processing
-- [ ] Add docstring to everything in the code
+- [x] Rename the library from real_time_audio_processing to real_time_audio_processing
+- [x] Add docstring to everything in the code
 - [ ] Add details and classes to class diagram
 - [ ] Create sequence diagram
 - [ ] Update README with diagrams and startup instructions
 - [x] Improve the DCCRN processor so that it will use overlapping windows instead of one window, to reduce problems that are caused at the end of the windows.
 - [ ] Add checks when importing libraries to not fail if a certain library does not exist, and instead just continue and not support the reader/processor/writer that uses this library (maybe even expose some way for the objects to tell which libraries they need, to know if they can be used before actually running them?)
+- [ ] Make it easier to add objects to the runner lists, so that they will behave like the built-in objects. This can be done by making the list a yaml file that can be passed as an argument to the script, or even multiple yaml files so that it will only require adding more files and not replacing them.
 - [ ] Add some kind of buffering to reading the data in the readers (read some amount of data before starting to pass the data to the writer)
+- [ ] Add a check in speaker_player to check that the stream is still running every time wait is called, and if the stream ended, return True to stop this writer. Can be checked with event.isSet().
+- [ ] Fix TODO in SpeakerPlayer.
 - [ ] Remove audio files from the repo
 - [ ] Change abstract classes to really be abstract (or interfaces if possible)
 - [ ] standardize arguments to the readers and writers (and replace additional_args with sounddee_args), and document somewhere what arguments exist in all of the classes

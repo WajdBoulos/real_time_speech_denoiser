@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-""" Process audio data.
+"""Process audio data.
 """
 from __future__ import absolute_import
 

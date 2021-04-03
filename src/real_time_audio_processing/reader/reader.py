@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-""" Read audio data from an input device and send it to be written
+"""Read audio data from an input device and send it to be written
 """
 from __future__ import absolute_import
 

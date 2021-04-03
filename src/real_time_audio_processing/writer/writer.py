@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-""" Write audio data to an output device.
+"""Write audio data to an output device.
 """
 
 from __future__ import absolute_import

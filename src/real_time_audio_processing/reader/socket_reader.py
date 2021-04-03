@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-""" Read audio data from a socket.
+"""Read audio data from a socket.
 """
 
 from __future__ import absolute_import
@@ -34,9 +34,12 @@ class SocketReader(Reader):
         """Initialize a listening socket, and wait for a socket writer to connect to it.
         After this function returns, self.socket should be a socket connected to a socket writer.
         """
+        # Ready a listening socket that waits for a connection
         self.listening_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.listening_socket.bind(tuple(self.address))
         self.listening_socket.listen(1)
+
+        # Accept the first connection, and close the listening socket
         self.socket, remote_addr = self.listening_socket.accept()
         print("got connection from", remote_addr)
         self.listening_socket.close()
@@ -55,6 +58,7 @@ class SocketReader(Reader):
             remaining_len = self.blocksize * self.sample_size
             while remaining_len != 0 and self.socket is not None:
                 try:
+                    # Add any new data to the end of the data we already have
                     current_data.append(self.socket.recv(remaining_len))
                     remaining_len -= len(current_data[-1])
                     if len(current_data[-1]) == 0:
@@ -69,7 +73,10 @@ class SocketReader(Reader):
                 total_data = bytearray(b"".join(current_data))
                 self.writer.data_ready(total_data)
 
+        # Make sure the socket is closed
         if self.socket is not None:
             self.socket.close()
             self.socket = None
+
+        # Let the writer do any final processing before exiting
         self.writer.finalize()

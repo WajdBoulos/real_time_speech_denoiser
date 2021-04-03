@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-""" Read audio data from a microphone.
+"""Read audio data from a microphone.
 """
 from __future__ import absolute_import
 
@@ -9,7 +9,7 @@ import sounddevice as sd
 import sys
 
 class MicrophoneReader(Reader):
-    """Record audio from the microphone and send each block of samples to a writer.
+    """Read audio from the microphone and send each block of samples to a writer.
     """
     def __init__(self, writer, additional_args=None, verbose=False):
         """Initialize a MicrophoneReader object.
@@ -20,7 +20,7 @@ class MicrophoneReader(Reader):
         Args:
             writer (Writer):        Writer object to give the data to.
             additional_args (dict): Additional arguments to pass to the creation of the sound device stream.
-
+            verbose (bool):         Should each minor error be printed.
         """
         self.writer = writer
         self.verbose = verbose
@@ -46,7 +46,7 @@ class MicrophoneReader(Reader):
                     by default sizeof(dtype) is 8.
                 frames (int):           Number of samples to process. Should be the same as blocksize.
                 time   (CData):         Time of the samples in indata. (from what I saw it is always 0).
-                stauts (CallbackFlags): Status of the stream. (were there dropped buffers, etc).
+                status (CallbackFlags): Status of the stream. (were there dropped buffers, etc).
 
             """
             if status and self.verbose:
@@ -63,4 +63,6 @@ class MicrophoneReader(Reader):
             while not self.writer.wait():
                 pass
         print("done with input stream")
+
+        # Let the writer do any final processing before exiting
         self.writer.finalize()

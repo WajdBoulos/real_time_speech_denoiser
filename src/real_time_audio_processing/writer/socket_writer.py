@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-""" Write audio data to a socket.
+"""Write audio data to a socket.
 """
 
 from __future__ import absolute_import
@@ -10,7 +10,8 @@ import socket
 import select
 
 class SocketWriter(Writer):
-    """Get audio data from a reader and send it to a socket"""
+    """Get audio data from a reader and send it to a socket.
+    """
     def __init__(self, dest, timeout=None):
         """Initialize a SocketWriter object.
         This writer connects to a remote socket, and sends it every block of data it gets.
@@ -76,7 +77,8 @@ class SocketWriter(Writer):
         return False
 
     def finalize(self):
-        # Close the socket to let the socket reader on the other end know that this is the end of the stream
+        """Close the socket to let the socket reader on the other end know that this is the end of the stream.
+        """
         if self.socket is not None:
             self.socket.close()
             self.socket = None

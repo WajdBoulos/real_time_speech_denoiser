@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-""" Show GUI window with visualization of audio data.
+"""Show GUI window with visualization of audio data.
 """
 from __future__ import absolute_import
 
@@ -54,11 +54,11 @@ class AudioVisualizer(Writer):
         self.initialize_animation()
 
     def initialize_parameters(self):
+        """Initialize the range a sample of each type may have.
+        """
         if self.sample_size == 4:
-            self.unpack_string = "f"
             self.data_range = (-1, 1)
         elif self.sample_size == 2:
-            self.unpack_string = "h"
             self.data_range = (-32768, 32767)
         else:
             raise ValueError(f"unsupported sample size {self.sample_size}")
@@ -130,6 +130,8 @@ class AudioVisualizer(Writer):
         return self.lines
 
     def finalize(self):
+        """Wait for the plot to close.
+        """
         if self.wait_for_plot:
             while plt.get_fignums():
                 plt.pause(self.blocking_time)
