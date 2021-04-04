@@ -18,8 +18,8 @@ class ProcessorWriter(Writer):
             processor (Processor):  processor to call with the data.
             writer (Writer):        writer to call with the data.
         """
-       self.processor = processor
-       self.writer = writer
+        self.processor = processor
+        self.writer = writer
 
     def data_ready(self, data):
         """Let the processor process the data, then call the writer with the data.

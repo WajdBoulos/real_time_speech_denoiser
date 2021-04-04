@@ -89,7 +89,7 @@ class SpeakerPlayer(Writer):
         self.stream = sd.RawOutputStream(callback=audio_callback, **self.additional_args, channels=1, finished_callback=self.event.set)
 
     def data_ready(self, data):
-         """Add the data to the queue, so audio_callback will output it when called.
+        """Add the data to the queue, so audio_callback will output it when called.
 
         Args:
             data (buffer):        data to write. It is a buffer with length of blocksize*sizeof(dtype).
