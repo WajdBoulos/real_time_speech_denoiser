@@ -4,9 +4,13 @@
 """
 from __future__ import absolute_import
 
-class Reader(object):
+from abc import ABC, abstractmethod
+
+
+class Reader(ABC):
     """Abstract reader class to read audio from any input device"""
 
+    @abstractmethod
     def read(self):
         """Read input data, and send it to a writer. 
         This function only returns when the writer signals that it does not want any more data.

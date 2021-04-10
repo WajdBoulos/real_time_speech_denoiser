@@ -9,7 +9,6 @@ a new environment with those packages.
 # Running the library
 To run an example, be in the home directory of this project (the directory this file is in), and run
 ```python -m src.real_time_audio_processing -f test\config\echo_visualizer.yaml```
-and add any other parameters to it.
 If you want to run a complex example using a socket tunnel, first start in one terminal:
 ```python -m src.real_time_audio_processing -f test\config\socket_visualizer_player.yaml```
 and then in a second terminal:
@@ -57,13 +56,13 @@ and finally in a third terminal:
 - [ ] Create sequence diagram
 - [ ] Update README with diagrams and startup instructions
 - [x] Improve the DCCRN processor so that it will use overlapping windows instead of one window, to reduce problems that are caused at the end of the windows.
-- [ ] Add checks when importing libraries to not fail if a certain library does not exist, and instead just continue and not support the reader/processor/writer that uses this library (maybe even expose some way for the objects to tell which libraries they need, to know if they can be used before actually running them?)
+- [x] Add checks when importing libraries to not fail if a certain library does not exist, and instead just continue and not support the reader/processor/writer that uses this library (maybe even expose some way for the objects to tell which libraries they need, to know if they can be used before actually running them?)
 - [ ] Make it easier to add objects to the runner lists, so that they will behave like the built-in objects. This can be done by making the list a yaml file that can be passed as an argument to the script, or even multiple yaml files so that it will only require adding more files and not replacing them.
 - [ ] Add some kind of buffering to reading the data in the readers (read some amount of data before starting to pass the data to the writer)
 - [ ] Add a check in speaker_player to check that the stream is still running every time wait is called, and if the stream ended, return True to stop this writer. Can be checked with event.isSet().
 - [ ] Fix TODO in SpeakerPlayer.
 - [ ] Remove audio files from the repo
-- [ ] Change abstract classes to really be abstract (or interfaces if possible)
+- [x] Change abstract classes to really be abstract
 - [ ] standardize arguments to the readers and writers (and replace additional_args with sounddee_args), and document somewhere what arguments exist in all of the classes
 - [ ] Add some way for the reader to tell the writer what samplerate (and maybe data type and such) it works in, so that you can set the samplerate only in the reader and it will propagate to the processors and writers, and so that if the reader can infer the samplerate (like in the case of the file reader), there will not be a need to specify a samplerate at all.
 - [ ] Find a way to synchronize the audio of speaker_player and the video of audio_visualizer

@@ -5,9 +5,12 @@
 
 from __future__ import absolute_import
 
-class Writer(object):
+from abc import ABC, abstractmethod
+
+class Writer(ABC):
     """Abstract writer class to write audio data gotten from a reader."""
 
+    @abstractmethod
     def data_ready(self, data):
         """Called by a reader for every block of data. 
         Process in this function should be done in minimal amount of time, to allow the reader to work in real time.
@@ -24,6 +27,7 @@ class Writer(object):
         """
         pass
 
+    @abstractmethod
     def wait(self):
         """Process data gotten in data_ready.
         This function is used by the reader in order to know when it should stop reading, and in order to
@@ -38,10 +42,11 @@ class Writer(object):
         """
         pass
 
+    @abstractmethod
     def finalize(self):
         """Process any leftover data, and close the writer.
         This function is only called after all the available data was sent to the writer with calls
-        to data_ready, and the reader is done and want to finish running.
+        to data_ready, and the reader is done and wants to finish running.
         In this function the writer should finish processing any leftover data it saved for itself,
         clean and close any leftover resources, and once it returns the program will be closed.
         This function is called in the same thread as the wait function, and the writer can take as long 

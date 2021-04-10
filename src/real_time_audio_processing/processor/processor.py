@@ -4,13 +4,16 @@
 """
 from __future__ import absolute_import
 
-class Processor(object):
+from abc import ABC, abstractmethod
+
+class Processor(ABC):
     """Abstract processor class to process audio data.
     This class was created to fill a gap between a reader and a writer, in order to add processing stages
     between reading the data and writing it. It is also useful for multiple processing stages, as multiple
     Processor Writers can be chained for more complex processing.
     """
 
+    @abstractmethod
     def process(self, data):
         """Process a block of data.
         A Processor Writer should call this function for every block of data.
@@ -23,6 +26,7 @@ class Processor(object):
         """
         pass
 
+    @abstractmethod
     def wait(self):
         """Run time to process any data.
         A Processor Writer should call this function when it is okay to take more time to run.
@@ -36,5 +40,16 @@ class Processor(object):
         """
         pass
 
+    @abstractmethod
     def finalize(self):
+        """Process any leftover data, and close the processor.
+        This function is only called after all the available data was sent to the processor with calls
+        to process, and the reader is done and wants to finish running.
+        In this function the processor should finish processing any leftover data it saved for itself,
+        clean and close any leftover resources, and once it returns the program will be closed.
+        This function is called in the same thread as the wait function, and the processor can take as long 
+        as it needs to finish processing the data.
+        This function will be called even if the procesor chooses to finish the run by returning True in
+        the wait function.
+        """
         pass

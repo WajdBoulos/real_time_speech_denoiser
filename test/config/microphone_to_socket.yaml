@@ -1,6 +1,7 @@
 {
     "reader": {"type":"microphone_reader", "args":{"additional_args":{"samplerate":16000.0, "blocksize":1024}}},
     "pipeline": [
+        # {"type":"DCCRN_processor", "args":{"sample_size":4, "should_overlap":False, "ratio_power":1, "model_path":"models/DCCRN_sr_16k_batch_16_correct_BN_stft_lookahead.pth"}},
     ],
     "writers": [
         {"type":"socket_writer", "args":{"dest":["127.0.0.1", 35852]}},
