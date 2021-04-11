@@ -7,6 +7,7 @@ from __future__ import absolute_import
 
 from .writer import Writer
 import sounddevice as sd
+import numpy as np
 import sys
 import queue
 import time
@@ -62,11 +63,6 @@ class SpeakerPlayer(Writer):
                 # Print the status
                 if self.verbose:
                     print("SpeakerPlayer callback status:", status, file=sys.stderr)
-                # We did not manage to ready the data in time, zero the buffer.
-                # TODO: Check if this is really needed, or if it only hinders the code.
-                if status.output_underflow:
-                    outdata[:] = b"\x00"*len(outdata)
-                    return
             try:
                 # Get the next block from the queue
                 data = self.q.get_nowait()
@@ -81,12 +77,12 @@ class SpeakerPlayer(Writer):
                 else:
                     # We are still not in the maximum amount of allowed empty buffers, so just zero the buffer
                     self.empty_buffer_count += 1
-                    outdata[:] = b"\x00"*len(outdata)
+                    outdata[:] = np.zeros((len(outdata), 1))
                     return
-            outdata[:] = data
+            outdata[:] = data.reshape((len(data), 1))
 
         # Open the output stream
-        self.stream = sd.RawOutputStream(callback=audio_callback, **self.additional_args, channels=1, finished_callback=self.event.set)
+        self.stream = sd.OutputStream(callback=audio_callback, **self.additional_args, channels=1, finished_callback=self.event.set)
 
     def data_ready(self, data):
         """Add the data to the queue, so audio_callback will output it when called.

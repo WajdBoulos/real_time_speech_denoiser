@@ -9,12 +9,10 @@ from __future__ import absolute_import
 
 from .processor import Processor
 
-from ..utils.raw_samples_converter import raw_samples_to_array, array_to_raw_samples
-
 class Multiplier(Processor):
     """Multiply each sample by a given factor.
     """
-    def __init__(self, factor, sample_size=4):
+    def __init__(self, factor):
         """Initialize a Multiplier processor.
         
         Args:
@@ -23,7 +21,6 @@ class Multiplier(Processor):
                 actual sample value.
         """
         self.factor = factor
-        self.sample_size = sample_size
 
     def process(self, data):
         """Multiply each of the samples.
@@ -31,12 +28,8 @@ class Multiplier(Processor):
         Args:
             data (buffer):        data to multiply. It is a buffer with length of blocksize*sizeof(dtype).
         """
-        # Convert the raw data to actual samples
-        samples = raw_samples_to_array(data, self.sample_size)
-        # Multiply each of the samples
-        samples = [sample * self.factor for sample in samples]
-        # Convert back the multiplied samples to raw data
-        array_to_raw_samples(samples, data, self.sample_size)
+        # Multiply each of the samples by the factor
+        data *= self.factor
 
     def wait(self):
         """Always return False, to never finish.

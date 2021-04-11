@@ -11,7 +11,7 @@ import soundfile as sf
 class FileReader(Reader):
     """Read audio from a file and send each block of samples to a writer.
     """
-    def __init__(self, writer, path, blocksize, wav_format=True, sample_size=4):
+    def __init__(self, writer, path, blocksize, sample_size=4):
         """Initialize a FileReader object.
         This reader works by using the soundfile library to open a wav file and read the data from it.
 
@@ -24,8 +24,6 @@ class FileReader(Reader):
                 samples from the file, put the bytes in a buffer, and call the writer with the block. If the total
                 length of the file does not divide by this block size, any leftover data after the last full block will
                 be ignored.
-            wav_format (bool):  Is the file a wav format. If it is not, it is assumed that the file is just a blob of
-                raw samples.
             sample_size (int):  The size in bytes of each sample when formatted as raw data.
 
         """
@@ -33,7 +31,6 @@ class FileReader(Reader):
         self.path = path
         self.blocksize = blocksize
         self.sample_size = sample_size
-        self.wav_format = wav_format
         self.initialize_file()
 
     def initialize_file(self):
@@ -42,16 +39,16 @@ class FileReader(Reader):
         # Open the file
         print("opening input file")
         self.file = open(self.path, "rb")
-        if self.wav_format:
-            # Start a sound file object form the file
-            self.sf = sf.SoundFile(self.file, "rb")
-            # Decide on the type of data to convert the samples into when reading them
-            if self.sample_size == 4:
-                self.dtype = "float32"
-            elif self.sample_size == 2:
-                self.dtype = "int16"
-            else:
-                raise ValueError(f"unsupported sample size {self.sample_size}")
+
+        # Start a sound file object form the file
+        self.sf = sf.SoundFile(self.file, "rb")
+        # Decide on the type of data to convert the samples into when reading them
+        if self.sample_size == 4:
+            self.dtype = "float32"
+        elif self.sample_size == 2:
+            self.dtype = "int16"
+        else:
+            raise ValueError(f"unsupported sample size {self.sample_size}")
 
 
     def read(self):
@@ -63,26 +60,19 @@ class FileReader(Reader):
         # Work as long as the writer wants more data
         while not self.writer.wait():
             # Read the audio data from the file
-            if self.wav_format:
-                data = self.sf.buffer_read(self.blocksize, dtype=self.dtype)
-            else:
-                data = self.file.read(self.blocksize * self.sample_size)
+            data = self.sf.read(self.blocksize, dtype=self.dtype)
 
             # Check that we read a full block of data
-            if len(data) != (self.blocksize * self.sample_size):
+            if len(data) != (self.blocksize):
                 print("reached end of input file")
                 break
-
-            # Convert the data to a bytearray to conform to the API
-            data = bytearray(data)
 
             # Send the data to the writer
             self.writer.data_ready(data)
 
         # Close the file
         print("closing input file")
-        if self.wav_format:
-            self.sf.close()
+        self.sf.close()
         self.file.close()
 
         # Let the writer do any final processing before exiting

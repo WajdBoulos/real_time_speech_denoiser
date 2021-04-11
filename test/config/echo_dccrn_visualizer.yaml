@@ -1,10 +1,10 @@
 {
     "reader": {"type":"microphone_reader", "verbose":True, "args":{"additional_args":{"samplerate":16000.0, "blocksize":4096}}},
     "pipeline": [
-        {"type":"DCCRN_processor", "args":{"sample_size":4, "should_overlap":True, "ratio_power":1, "model_path":"models/DCCRN_sr_16k_batch_16_correct_BN_stft_lookahead.pth"}},
+        {"type":"DCCRN_processor", "args":{"should_overlap":True, "model_path":"models/DCCRN_sr_16k_batch_16_correct_BN_stft_lookahead.pth"}},
     ],
     "writers": [
-        {"type":"audio_visualizer", "args":{"samplerate":16000.0, "blocking_time":0.001, "duration":5, "blocksize":4096}},
-        {"type":"speaker_player", "verbose":True, "args":{"blocking_time":0.01, "additional_args":{"samplerate":16000.0, "blocksize":4096}}},
+        {"type":"audio_visualizer", "args":{"samplerate":16000.0, "blocking_time":0.001, "duration":5}},
+        {"type":"speaker_player", "verbose":True, "args":{"blocking_time":0, "additional_args":{"samplerate":16000.0, "blocksize":4096}}},
     ],
 }

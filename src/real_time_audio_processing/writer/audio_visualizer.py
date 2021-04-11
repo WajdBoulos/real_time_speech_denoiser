@@ -6,8 +6,6 @@ from __future__ import absolute_import
 
 from .writer import Writer
 
-from ..utils.raw_samples_converter import raw_samples_to_array
-
 from matplotlib.animation import FuncAnimation
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,7 +13,7 @@ import queue
 
 class AudioVisualizer(Writer):
     """GUI Visualizer for audio data"""
-    def __init__(self, samplerate, duration=200.0, interval=30.0, downsample=1, blocking_time=None, blocksize=1024, sample_size=4, wait_for_plot=False):
+    def __init__(self, samplerate, duration=200.0, interval=30.0, downsample=1, blocking_time=None, sample_size=4, wait_for_plot=False):
         """Initialize an AudioVisualizer object.
         This writer opens a GUI window, and shows an interactive visualization of the audio data it gets in real time.
 
@@ -30,7 +28,6 @@ class AudioVisualizer(Writer):
                 sampling in very high frequencies.
             blocking_time (float):  Maximum amount of time to block each time wait() is called. If None, wait() will
                 block until the visualization window is closed.
-            blocksize (int):        Amount of samples in each block that will be received in data_ready.
             sample_size (int):      Amount of bytes in each sample.
 
         """
@@ -44,7 +41,6 @@ class AudioVisualizer(Writer):
         else:
             self.blocking = False
         self.did_show = False
-        self.blocksize = blocksize
         self.sample_size = sample_size
         self.wait_for_plot = wait_for_plot
 
@@ -93,7 +89,6 @@ class AudioVisualizer(Writer):
         Args:
             data (buffer):        data to write. It is a buffer with length of blocksize*sizeof(dtype).
         """
-        data = np.array([[i] for i in raw_samples_to_array(data, self.sample_size)])
         self.q.put(data[::self.downsample])
 
     def wait(self):
@@ -124,7 +119,7 @@ class AudioVisualizer(Writer):
                 break
             shift = len(data)
             self.plotdata = np.roll(self.plotdata, -shift, axis=0)
-            self.plotdata[-shift:, :] = data
+            self.plotdata[-shift:, :] = data.reshape((len(data), 1))
         for column, line in enumerate(self.lines):
             line.set_ydata(self.plotdata[:, column])
         return self.lines

@@ -28,8 +28,8 @@ class MicrophoneReader(Reader):
         if additional_args is not None:
             self.additional_args = additional_args
 
-        # Use a raw python buffer stream (and not a numpy array)
-        self.stream = sd.RawInputStream
+        # Use a numpy array stream
+        self.stream = sd.InputStream
 
     def read(self):
         """Read from a microphone, and send it to a writer.
@@ -51,7 +51,7 @@ class MicrophoneReader(Reader):
             """
             if status and self.verbose:
                 print("MicrophoneReader callback status:", status, file=sys.stderr)
-            self.writer.data_ready(indata)
+            self.writer.data_ready(indata.reshape((len(indata))))
 
         # Initialize a stream for input.
         stream = self.stream(callback=audio_callback, **self.additional_args, channels=1)

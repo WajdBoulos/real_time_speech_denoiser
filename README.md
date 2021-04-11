@@ -60,10 +60,11 @@ and finally in a third terminal:
 - [ ] Make it easier to add objects to the runner lists, so that they will behave like the built-in objects. This can be done by making the list a yaml file that can be passed as an argument to the script, or even multiple yaml files so that it will only require adding more files and not replacing them.
 - [ ] Add some kind of buffering to reading the data in the readers (read some amount of data before starting to pass the data to the writer)
 - [ ] Add a check in speaker_player to check that the stream is still running every time wait is called, and if the stream ended, return True to stop this writer. Can be checked with event.isSet().
-- [ ] Fix TODO in SpeakerPlayer.
+- [ ] Write some explanation about the fact that you should only put blocking_time as something different than 0 for one writer/processor, and it should be small (with the only exception being the audio visualizer, as it needs the time to run the GUI, so it should be something like 0.001 or even less, for each audio visualizer).
+- [x] Fix TODO in SpeakerPlayer.
 - [ ] Remove audio files from the repo
 - [x] Change abstract classes to really be abstract
-- [ ] standardize arguments to the readers and writers (and replace additional_args with sounddee_args), and document somewhere what arguments exist in all of the classes
+- [ ] standardize arguments to the readers and writers (and replace additional_args with sounddevice_args), and document somewhere what arguments exist in all of the classes
 - [ ] Add some way for the reader to tell the writer what samplerate (and maybe data type and such) it works in, so that you can set the samplerate only in the reader and it will propagate to the processors and writers, and so that if the reader can infer the samplerate (like in the case of the file reader), there will not be a need to specify a samplerate at all.
 - [ ] Find a way to synchronize the audio of speaker_player and the video of audio_visualizer
 - [ ] Tidy up code
