@@ -74,7 +74,7 @@ class SpeakerPlayer(Writer):
             except queue.Empty as e:
                 # Print the error that no data was ready in time
                 if self.verbose:
-                    print('Buffer is empty', file=sys.stderr)
+                    print('SpeakerPlayer queue is empty', file=sys.stderr)
                 if self.empty_buffer_count >= self.max_empty_buffers:
                     # Too many empty buffers in a row, time to abort
                     raise sd.CallbackAbort from e
