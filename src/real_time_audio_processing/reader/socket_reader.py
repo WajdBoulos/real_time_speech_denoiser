@@ -36,6 +36,7 @@ class SocketReader(Reader):
         """
         # Ready a listening socket that waits for a connection
         self.listening_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.listening_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.listening_socket.bind(tuple(self.address))
         self.listening_socket.listen(1)
 

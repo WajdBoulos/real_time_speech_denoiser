@@ -2,6 +2,7 @@
     "reader": {"type":"socket_reader", "args":{"address":["127.0.0.1", 35852], "blocksize":1024}},
     "pipeline": [
         {"type":"multiplier", "args":{"factor":1.1, "sample_size":4}},
+        # {"type":"DCCRN_processor", "args":{"sample_size":4, "should_overlap":False, "ratio_power":1, "model_path":"models/DCCRN_sr_16k_batch_16_correct_BN_stft_lookahead.pth"}},
     ],
     "writers": [
         {"type":"socket_writer", "args":{"dest":["127.0.0.1", 35853], "timeout":0.01}},
