@@ -37,7 +37,8 @@ known_processors = {
                     "pipeline": lambda:importlib.import_module("..processor.pipeline", __package__).Pipeline,
                     "multiplier": lambda:importlib.import_module("..processor.multiplier", __package__).Multiplier,
                     "DCCRN_processor": lambda:importlib.import_module("..processor.dccrn_processor", __package__).DCCRNProcessor,
-                    }
+                    "DCCRN_official_processor": lambda:importlib.import_module("..processor.dccrn_official_processor", __package__).DCCRNOfficialProcessor,
+}
 
 class Runner(object):
     """Runner object to create and run the objects for the audio processing"""
