@@ -33,11 +33,17 @@ class DCCRNProcessor(Processor):
         """
         self.sample_size = sample_size
         # Ready the NN model used by DCCRN
+        self.model_path = model_path
         self.model = DCCRN.load_model(model_path)
         self.should_overlap = should_overlap
         if self.should_overlap:
             self.previous_original = None
         self.ratio_power = ratio_power
+
+    def reset(self):
+        self.model = DCCRN.load_model(self.model_path)
+        self.previous_original = None
+        self.previous_processed = None
 
     def clean_noise(self, samples):
         """Use the DCCRN model and clean the noise from the given samples.
@@ -99,5 +105,6 @@ class DCCRNProcessor(Processor):
     def finalize(self):
         """Do nothing, as all the processing was done in the process function.
         """
+        self.reset()
         return
 
