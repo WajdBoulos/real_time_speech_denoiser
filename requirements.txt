@@ -28,21 +28,10 @@ ffmpeg
 # For file reader and writer
 pysoundfile
 
-# train
-tqdm
-visdom
-mir_eval
-pystoi
-pesq
-fairseq
-
-
-
-
-
-
-
-
-
-
-
+# for training
+#tqdm
+#visdom
+#mir_eval
+#pystoi
+#pesq
+#fairseq
