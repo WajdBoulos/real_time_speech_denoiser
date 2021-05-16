@@ -21,9 +21,28 @@ pytorch=1.7.1
 torchvision=0.8.2
 torchaudio=0.7.2
 
-cudatoolkit=10.1 # Use a version that works with the pytorch version and is installed on the computer
+cudatoolkit # Use a version that works with the pytorch version and is installed on the computer
 numba=0.48
 ffmpeg
 
 # For file reader and writer
-pysoundfile=0.10.3
+pysoundfile
+
+# train
+tqdm
+visdom
+mir_eval
+pystoi
+pesq
+fairseq
+
+
+
+
+
+
+
+
+
+
+
