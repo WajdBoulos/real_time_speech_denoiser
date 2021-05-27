@@ -257,13 +257,22 @@ class Separator(nn.Module):
         self.rnn = getattr(nn, rnn_type)(rnn_input_size, rnn_hidden_size, num_layers, batch_first=True,
                                          bidirectional=False)
         self.dense = nn.Linear(rnn_hidden_size, rnn_input_size)
+        self.hn = None
+        self.cn = None
+
+    def lstm_perform(self, input_data):
+        if self.hn is None:
+            out, (self.hn, self.cn) = self.rnn(input_data)
+        else:
+            out, (self.hn, self.cn) = self.rnn(input_data, (self.hn, self.cn))
+        return out
 
     def forward(self, encoded_real, encoded_imag):
         #  Concat real and imaginary, currently no complex LSTM
         concat_input = torch.cat((encoded_real, encoded_imag), dim=1)
         B, N, F, T = concat_input.shape
         concat_input = concat_input.view(B, -1, T).permute(0, 2, 1)  # [B, T, NF]
-        output_separator = self.dense(self.rnn(concat_input)[0]).permute(0, 2, 1)  # input to dense is also [B T NF]
+        output_separator = self.dense(self.lstm_perform(concat_input)).permute(0, 2, 1)  # input to dense is also [B T NF]
         output_separator = output_separator.view(B, N, F, T)
         separated_real, separated_imag = output_separator[:, :N // 2, :, :], output_separator[:, N // 2:, :, :]
         return separated_real, separated_imag
