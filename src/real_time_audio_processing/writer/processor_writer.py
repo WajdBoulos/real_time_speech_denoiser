@@ -46,3 +46,7 @@ class ProcessorWriter(Writer):
         """
         self.processor.finalize()
         self.writer.finalize()
+
+    def initialize_file(self, file):
+        self.processor.finalize()
+        self.writer.initialize_file(file)

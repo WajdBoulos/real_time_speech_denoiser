@@ -24,14 +24,16 @@ known_readers = {
                     "microphone_reader": lambda:importlib.import_module("..reader.microphone_reader", __package__).MicrophoneReader,
                     "socket_reader": lambda:importlib.import_module("..reader.socket_reader", __package__).SocketReader,
                     "file_reader": lambda:importlib.import_module("..reader.file_reader", __package__).FileReader,
-                }
+                    "multi_file_reader": lambda:importlib.import_module("..reader.multi_file_reader", __package__).FileReader,
+}
 known_writers = {
                     "audio_visualizer": lambda:importlib.import_module("..writer.audio_visualizer", __package__).AudioVisualizer,
                     "socket_writer": lambda:importlib.import_module("..writer.socket_writer", __package__).SocketWriter,
                     "speaker_player": lambda:importlib.import_module("..writer.speaker_player", __package__).SpeakerPlayer,
                     "processor_writer": lambda:importlib.import_module("..writer.processor_writer", __package__).ProcessorWriter,
                     "file_writer": lambda:importlib.import_module("..writer.file_writer", __package__).FileWriter,
-                }
+                    "multi_file_writer": lambda:importlib.import_module("..writer.multi_file_writer", __package__).FileWriter,
+}
 known_processors = {
                     "splitter": lambda:importlib.import_module("..processor.splitter", __package__).Splitter,
                     "pipeline": lambda:importlib.import_module("..processor.pipeline", __package__).Pipeline,

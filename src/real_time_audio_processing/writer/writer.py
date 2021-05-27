@@ -55,3 +55,6 @@ class Writer(ABC):
         the wait function.
         """
         pass
+
+    def initialize_file(self, file):
+        pass
