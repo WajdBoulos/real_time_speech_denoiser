@@ -1,0 +1,9 @@
+{
+  "reader": {"type":"file_reader", "args":{"path":"src/DCCRN/example1/noisy_Score_3.02/sp01_noisy_14dB_SG.wav", "blocksize":4096, "sample_size":4}},
+  "pipeline": [
+  {"type":"Fullsubnet_processor", "args":{"sample_size":4, "should_overlap":True, "ratio_power":1, "model_path":"models/fullsubnet_best_model_58epochs.tar"}},
+  ],
+  "writers": [
+  {"type":"file_writer", "args":{"path":"sp01_noisy_14dB_SG.wav", "blocking_time":0.0001}},
+  ],
+}

@@ -39,6 +39,7 @@ known_processors = {
                     "pipeline": lambda:importlib.import_module("..processor.pipeline", __package__).Pipeline,
                     "multiplier": lambda:importlib.import_module("..processor.multiplier", __package__).Multiplier,
                     "DCCRN_processor": lambda:importlib.import_module("..processor.dccrn_processor", __package__).DCCRNProcessor,
+                    "Fullsubnet_processor": lambda:importlib.import_module("..processor.fullsubnet_processor", __package__).FullsubnetProcessor,
                     }
 
 class Runner(object):

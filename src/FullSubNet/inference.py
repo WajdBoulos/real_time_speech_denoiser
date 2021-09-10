@@ -16,6 +16,7 @@ def denoise(config, checkpoint_path, output_dir):
 #     parser.add_argument("-C", "--configuration", type=str, required=True, help="Config file.")
 #     parser.add_argument("-M", "--model_checkpoint_path", type=str, required=True, help="The path of the model's checkpoint.")
 #     parser.add_argument("-O", "--output_dir", type=str, required=True, help="The path for saving enhanced speeches.")
+#     parser.add_argument("-O", "--output_dir", type=str, required=True, help="The path for saving enhanced speeches.")
 #     args = parser.parse_args()
 #
 #     configuration = toml.load(args.configuration)
