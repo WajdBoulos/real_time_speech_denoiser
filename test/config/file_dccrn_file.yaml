@@ -1,5 +1,5 @@
 {
-    "reader": {"type":"file_reader", "args":{"path":"src/DCCRN/example1/noisy_Score_3.02/sp01_noisy_14dB_SG.wav", "blocksize":4096, "sample_size":4}},
+    "reader": {"type":"file_reader", "args":{"path":"MosTest/ms_realrec_speakerphone_speakerphone_clatter_senja_2.wav", "blocksize":4096, "sample_size":4}},
     "pipeline": [
         {"type":"DCCRN_processor", "args":{"sample_size":4, "should_overlap":True, "ratio_power":1, "model_path":"models/DCCRN_sr_16k_batch_16_correct_BN_stft_lookahead.pth"}},
     ],

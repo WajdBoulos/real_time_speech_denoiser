@@ -110,7 +110,7 @@ class Inferencer(BaseInferencer):
         return enhanced
 
     @torch.no_grad()
-    def full_band_crm_mask(self, noisy, inference_args):
+    def full_band_crm_mask(self, noisy):
         noisy_complex = self.torch_stft(noisy)
         noisy_mag, _ = mag_phase(noisy_complex)
 

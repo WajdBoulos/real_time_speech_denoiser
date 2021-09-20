@@ -1,16 +1,23 @@
 import torch
 from torch.nn import functional
+import sys
+#sys.path.append("..") # Adds higher directory to python modules path.
 
+#from audio_zen.acoustics.feature import drop_band
+#from audio_zen.model.base_model import BaseModel
+#from audio_zen.model.module.sequence_model import SequenceModel
+
+#
 from ..audio_zen.acoustics.feature import drop_band
 from ..audio_zen.model.base_model import BaseModel
 from ..audio_zen.model.module.sequence_model import SequenceModel
+import cProfile
 
-# sys.path.append("..") # Adds higher directory to python modules path.
-#
-# from audio_zen.acoustics.feature import drop_band
-# from audio_zen.model.base_model import BaseModel
-# from audio_zen.model.module.sequence_model import SequenceModel
-
+def runFB(fb, arg):
+    a = fb(arg)
+    return a
+def runSB(fb, arg):
+    return fb(arg)
 
 class Model(BaseModel):
     def __init__(self,
@@ -87,7 +94,14 @@ class Model(BaseModel):
 
         # Fullband model
         fb_input = self.norm(noisy_mag).reshape(batch_size, num_channels * num_freqs, num_frames)
-        fb_output = self.fb_model(fb_input).reshape(batch_size, 1, num_freqs, num_frames)
+        #pr = cProfile.Profile()
+        #pr.enable()
+
+        fb_output = runFB(self.fb_model, fb_input).reshape(batch_size, 1, num_freqs, num_frames)
+
+
+        #pr.disable()
+        #pr.print_stats(sort='time')
 
         # Unfold the output of the fullband model, [B, N=F, C, F_f, T]
         fb_output_unfolded = self.unfold(fb_output, num_neighbor=self.fb_num_neighbors)
@@ -114,7 +128,14 @@ class Model(BaseModel):
         )
 
         # [B * F, (F_s + F_f), T] => [B * F, 2, T] => [B, F, 2, T]
-        sb_mask = self.sb_model(sb_input)
+        #pr = cProfile.Profile()
+        #pr.enable()
+
+        sb_mask = runSB(self.sb_model, sb_input)
+
+
+        #pr.disable()
+        #pr.print_stats(sort='time')
         sb_mask = sb_mask.reshape(batch_size, num_freqs, 2, num_frames).permute(0, 2, 1, 3).contiguous()
 
         output = sb_mask[:, :, :, self.look_ahead:]
@@ -139,25 +160,25 @@ if __name__ == "__main__":
             norm_type="offline_laplace_norm",
             num_groups_in_drop_band=2,
         )
-        # ipt = torch.rand(3, 800)  # 1.6s
-        # ipt_len = ipt.shape[-1]
-        # # 1000 frames (16s) - 5.65s (35.31%，纯模型) - 5.78s
-        # # 500 frames (8s) - 3.05s (38.12%，纯模型) - 3.04s
-        # # 200 frames (3.2s) - 1.19s (37.19%，纯模型) - 1.20s
-        # # 100 frames (1.6s) - 0.62s (38.75%，纯模型) - 0.65s
-        # start = datetime.datetime.now()
-        #
-        # complex_tensor = torch.stft(ipt, n_fft=512, hop_length=256)
-        # mag = (complex_tensor.pow(2.).sum(-1) + 1e-8).pow(0.5 * 1.0).unsqueeze(1)
-        # print(f"STFT: {datetime.datetime.now() - start}, {mag.shape}")
-        #
-        # enhanced_complex_tensor = model(mag).detach().permute(0, 2, 3, 1)
-        # print(enhanced_complex_tensor.shape)
-        # print(f"Model Inference: {datetime.datetime.now() - start}")
-        #
-        # enhanced = torch.istft(enhanced_complex_tensor, 512, 256, length=ipt_len)
-        # print(f"iSTFT: {datetime.datetime.now() - start}")
-        #
-        # print(f"{datetime.datetime.now() - start}")
+        ipt = torch.rand(1, 800)  # 1.6s
+        ipt_len = ipt.shape[-1]
+        # 1000 frames (16s) - 5.65s (35.31%，纯模型) - 5.78s
+        # 500 frames (8s) - 3.05s (38.12%，纯模型) - 3.04s
+        # 200 frames (3.2s) - 1.19s (37.19%，纯模型) - 1.20s
+        # 100 frames (1.6s) - 0.62s (38.75%，纯模型) - 0.65s
+        start = datetime.datetime.now()
+
+        complex_tensor = torch.stft(ipt, n_fft=512, hop_length=256)
+        mag = (complex_tensor.pow(2.).sum(-1) + 1e-8).pow(0.5 * 1.0).unsqueeze(1)
+        print(f"STFT: {datetime.datetime.now() - start}, {mag.shape}")
+
+        enhanced_complex_tensor = model(mag).detach().permute(0, 2, 3, 1)
+        print(enhanced_complex_tensor.shape)
+        print(f"Model Inference: {datetime.datetime.now() - start}")
+
+        enhanced = torch.istft(enhanced_complex_tensor, 512, 256, length=ipt_len)
+        print(f"iSTFT: {datetime.datetime.now() - start}")
+
+        print(f"{datetime.datetime.now() - start}")
         ipt = torch.rand(3, 1, 257, 200)
         print(model(ipt).shape)
