@@ -64,8 +64,11 @@ class FullsubnetProcessor(Processor):
         if self.should_overlap:
             self.previous_original = None
         self.ratio_power = ratio_power
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        (self.model).to(device)
 
     def clean_noise(self, samples):
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
         """Use the DCCRN model and clean the noise from the given samples.
 
         Args:
@@ -73,13 +76,14 @@ class FullsubnetProcessor(Processor):
         """
         # Pass the audio through the DCCRN model
         #clean = Inferencer.full_band_crm_mask(samples)
-        noisy_complex = torch.stft((torch.Tensor([samples])), n_fft=512, hop_length=256, window=torch.hann_window(512), return_complex=True)
+        noisy_complex = torch.stft((torch.Tensor([samples])), n_fft=512, hop_length=256, window=torch.hann_window(512), return_complex=True).to(device)
 
         noisy_mag = torch.abs(noisy_complex).unsqueeze(1)
         # pr = cProfile.Profile()
         # pr.enable()
+        noisy_mag = noisy_mag.to(device)
 
-        pred_crm = self.model(noisy_mag).detach().permute(0, 2, 3, 1)
+        pred_crm = self.model(noisy_mag).detach().permute(0, 2, 3, 1).to(device)
 
 
         # pr.disable()
