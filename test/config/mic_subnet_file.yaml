@@ -1,0 +1,9 @@
+{
+  "reader": {"type":"microphone_reader", "args":{"additional_args":{"samplerate":16000.0, "blocksize":4096}}},
+  "pipeline": [
+  {"type":"Fullsubnet_processor", "args":{"sample_size":4, "should_overlap":True, "ratio_power":1, "model_path":"models/fullsubnet_best_model_58epochs.tar"}},
+  ],
+  "writers": [
+  {"type":"file_writer", "args":{"path":"out69subnet.wav", "blocking_time":0.0001}},
+  ],
+}
