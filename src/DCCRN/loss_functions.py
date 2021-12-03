@@ -7,7 +7,7 @@ import torch
 import torch.nn.functional as F
 import scipy.signal
 import torchaudio
-from .utils import arrange_batch, parse_audio
+from utils import arrange_batch, parse_audio
 
 EPS = 1e-8
 

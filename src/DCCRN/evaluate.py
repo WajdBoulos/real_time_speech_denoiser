@@ -10,9 +10,9 @@ from pystoi import stoi
 from pesq import pesq
 import time
 
-from .loss_functions import calc_si_sdr
-from .separate import separate
-from .preprocess import preprocess_one_dir
+from loss_functions import calc_si_sdr
+from separate import separate
+from preprocess import preprocess_one_dir
 from tqdm import tqdm
 import math
 

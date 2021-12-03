@@ -7,7 +7,7 @@ from tqdm import tqdm
 import visdom
 import torch
 
-from .loss_functions import cal_loss
+from loss_functions import cal_loss
 
 
 class Solver(object):
