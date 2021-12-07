@@ -15,10 +15,6 @@ from ..utils.raw_samples_converter import raw_samples_to_array, array_to_raw_sam
 import torch
 import cProfile
 
-def decompress_cIRM(mask, K=10, limit=9.9):
-    mask = limit * (mask >= limit) - limit * (mask <= -limit) + mask * (torch.abs(mask) < limit)
-    mask = -K * torch.log((K - mask) / (K + mask))
-    return mask
 
 class FullsubnetProcessor(Processor):
     """Reduce noise in the audio.
@@ -42,6 +38,8 @@ class FullsubnetProcessor(Processor):
         # Ready the NN model used by DCCRN
         #        self.model = DCCRN.load_model(model_path)
 
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
         self.ratio_power = ratio_power
         self.model = Model(
             sb_num_neighbors=15,
@@ -56,6 +54,7 @@ class FullsubnetProcessor(Processor):
             weight_init=False,
             norm_type="offline_laplace_norm",
             num_groups_in_drop_band=2,
+            device=device,
         )
 
         checkpoint = torch.load(model_path)
@@ -64,8 +63,6 @@ class FullsubnetProcessor(Processor):
         if self.should_overlap:
             self.previous_original = None
         self.ratio_power = ratio_power
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        (self.model).to(device)
 
     def clean_noise(self, samples):
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
