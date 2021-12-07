@@ -3,11 +3,11 @@
 # Created on 2018/12
 # Author: Kaituo XU
 
-
 import torch
 from data import AudioDataLoader, AudioDataset
 from solver import Solver
 from src.DeepComplexCRN.DCCRN import DCCRN
+from FSN import Model
 from torch.utils.data.dataset import random_split
 import math
 from fairseq.models.wav2vec import Wav2VecModel
@@ -89,6 +89,21 @@ def train(data_dir, epochs, batch_size, model_path, model_features_path, max_hou
     model = DCCRN(fft_len, win_len, hop_size, window, num_convs, enc_list, dec_list,
 freq_kernel_size,
                      time_kernel_size, stride, dilation, norm_type, rnn_type, num_layers, mask_type)
+
+    model = Model(
+        sb_num_neighbors=15,
+        fb_num_neighbors=0,
+        num_freqs=257,
+        look_ahead=2,
+        sequence_model="LSTM",
+        fb_output_activate_function="ReLU",
+        sb_output_activate_function=None,
+        fb_model_hidden_size=512,
+        sb_model_hidden_size=384,
+        weight_init=False,
+        norm_type="offline_laplace_norm",
+        num_groups_in_drop_band=2,
+    )
 
     if use_cuda:
         model = torch.nn.DataParallel(model)

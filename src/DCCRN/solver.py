@@ -1,13 +1,91 @@
 # Created on 2018/12
 # Author: Kaituo XU
+def compress_cIRM(mask, K=10, C=0.1):
+    """
+        Compress from (-inf, +inf) to [-K ~ K]
+    """
+    if torch.is_tensor(mask):
+        mask = -100 * (mask <= -100) + mask * (mask > -100)
+        mask = K * (1 - torch.exp(-C * mask)) / (1 + torch.exp(-C * mask))
+    else:
+        mask = -100 * (mask <= -100) + mask * (mask > -100)
+        mask = K * (1 - np.exp(-C * mask)) / (1 + np.exp(-C * mask))
+    return mask
+
+import math
+import numpy as np
+import torch
+
+NEG_INF = torch.finfo(torch.float32).min
+PI = math.pi
+SOUND_SPEED = 343  # m/s
+EPSILON = np.finfo(np.float32).eps
+MAX_INT16 = np.iinfo(np.int16).max
 
 import os
 import time
+
+from torch.cuda.amp import autocast
 from tqdm import tqdm
 import visdom
 import torch
 
 from loss_functions import cal_loss
+
+def build_complex_ideal_ratio_mask(noisy: torch.complex64, clean: torch.complex64) -> torch.Tensor:
+    """
+
+    Args:
+        noisy: [B, F, T], noisy complex-valued stft coefficients
+        clean: [B, F, T], clean complex-valued stft coefficients
+
+    Returns:
+        [B, F, T, 2]
+    """
+    denominator = torch.square(noisy.real) + torch.square(noisy.imag) + EPSILON
+
+    mask_real = (noisy.real * clean.real + noisy.imag * clean.imag) / denominator
+    mask_imag = (noisy.real * clean.imag - noisy.imag * clean.real) / denominator
+
+    complex_ratio_mask = torch.stack((mask_real, mask_imag), dim=-1)
+
+    return compress_cIRM(complex_ratio_mask, K=10, C=0.1)
+
+def mag_phase(complex_tensor):
+    return torch.abs(complex_tensor), torch.angle(complex_tensor)
+
+def drop_band(input, num_groups=2):
+    """
+    Reduce computational complexity of the sub-band part in the FullSubNet model.
+
+    Shapes:
+        input: [B, C, F, T]
+        return: [B, C, F // num_groups, T]
+    """
+    batch_size, _, num_freqs, _ = input.shape
+    assert batch_size > num_groups, f"Batch size = {batch_size}, num_groups = {num_groups}. The batch size should larger than the num_groups."
+
+    if num_groups <= 1:
+        # No demand for grouping
+        return input
+
+    # Each sample must has the same number of the frequencies for parallel training.
+    # Therefore, we need to drop those remaining frequencies in the high frequency part.
+    if num_freqs % num_groups != 0:
+        input = input[..., :(num_freqs - (num_freqs % num_groups)), :]
+        num_freqs = input.shape[2]
+
+    output = []
+    for group_idx in range(num_groups):
+        samples_indices = torch.arange(group_idx, batch_size, num_groups, device=input.device)
+        freqs_indices = torch.arange(group_idx, num_freqs, num_groups, device=input.device)
+
+        selected_samples = torch.index_select(input, dim=0, index=samples_indices)
+        selected = torch.index_select(selected_samples, dim=2, index=freqs_indices)  # [B, C, F // num_groups, T]
+
+        output.append(selected)
+
+    return torch.cat(output, dim=0)
 
 
 class Solver(object):
@@ -186,9 +264,27 @@ class Solver(object):
                 padded_mixture = padded_mixture.cuda()
                 mixture_lengths = mixture_lengths.cuda()
                 padded_clean_noise = padded_clean_noise.cuda()
-            estimate_source = self.model(padded_mixture)
-            source = padded_clean_noise[:, 0, :]  # first arg is source, second is noise
-            loss = cal_loss(source, estimate_source, mixture_lengths, device, features_model=self.deep_features_model)
+
+        noisy_complex = torch.stft((padded_mixture).to(device), n_fft=512, hop_length=256, window=torch.hann_window(512).to(device), return_complex=True)
+        clean_complex = torch.stft((padded_clean_noise[:, 0, :]).to(device), n_fft=512, hop_length=256, window=torch.hann_window(512).to(device), return_complex=True)
+
+        noisy_mag, _ = mag_phase(noisy_complex)
+        ground_truth_cIRM = build_complex_ideal_ratio_mask(noisy_complex, clean_complex)  # [B, F, T, 2]
+        ground_truth_cIRM = drop_band(
+            ground_truth_cIRM.permute(0, 3, 1, 2),  # [B, 2, F ,T]
+            self.model.module.num_groups_in_drop_band
+        ).permute(0, 2, 3, 1)
+
+        with autocast(enabled=False):
+            # [B, F, T] => [B, 1, F, T] => model => [B, 2, F, T] => [B, F, T, 2]
+            noisy_mag = noisy_mag.unsqueeze(1)
+            cRM = self.model(noisy_mag)
+            cRM = cRM.permute(0, 2, 3, 1)
+            loss = torch.nn.MSELoss(ground_truth_cIRM, cRM)
+
+            #estimate_source = self.model(padded_mixture)
+            #source = padded_clean_noise[:, 0, :]  # first arg is source, second is noise
+            #loss = cal_loss(source, estimate_source, mixture_lengths, device, features_model=self.deep_features_model)
             if not cross_valid:
                 self.optimizer.zero_grad()
                 loss.backward()
