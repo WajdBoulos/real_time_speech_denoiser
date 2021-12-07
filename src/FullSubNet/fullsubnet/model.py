@@ -70,7 +70,7 @@ class Model(BaseModel):
 
         self.sb_model = ComplexSequenceModel(
             input_size=(sb_num_neighbors * 2 + 1) + (fb_num_neighbors * 2 + 1),
-            output_size=2,
+            output_size=1,
             hidden_size=sb_model_hidden_size,
             num_layers=2,
             bidirectional=False,
@@ -119,8 +119,8 @@ class Model(BaseModel):
         #pr = cProfile.Profile()
         #pr.enable()
 
+        assert fb_input.dim() == 4
         fb_output = runFB(self.fb_model, fb_input).reshape(batch_size, num_channels, num_freqs, num_frames)
-        print(fb_output.shape)
 
         #pr.disable()
         #pr.print_stats(sort='time')
@@ -155,14 +155,12 @@ class Model(BaseModel):
         # [B * F, C, (F_s + F_f), T] => [B * F, 2, T] => [B, F, 2, T]
         #pr = cProfile.Profile()
         #pr.enable()
-        print(sb_input.shape)
         sb_mask = runSB(self.sb_model, sb_input)
 
 
         #pr.disable()
         #pr.print_stats(sort='time')
         # [B, F, 2, T] => [B, 2, F, T]
-        print(sb_mask.shape)
         sb_mask = sb_mask.reshape(batch_size, num_freqs, 2, num_frames).permute(0, 2, 1, 3).contiguous()
 
         sb_mask = sb_mask[:, :, :, self.look_ahead:]
@@ -205,7 +203,7 @@ if __name__ == "__main__":
         start = datetime.datetime.now()
 
         enhanced_tensor, mask = model(ipt)
-        enhanced_tensor, mask = enhanced_tensor.detach(), mask.reshape(0,2,3,1).detach()
+        enhanced_tensor, mask = enhanced_tensor.detach(), mask.permute(0,2,3,1).detach()
         print(enhanced_tensor.shape, mask.shape)
         print(f"Model Inference: {datetime.datetime.now() - start}")
 
@@ -213,6 +211,6 @@ if __name__ == "__main__":
         print(f"iSTFT: {datetime.datetime.now() - start}")
 
         print(f"{datetime.datetime.now() - start}")
-        ipt = torch.rand(3, 200)
+        ipt = torch.rand(3, 800)
         enhanced_tensor, mask = model(ipt)
         print(enhanced_tensor.shape, mask.shape)
