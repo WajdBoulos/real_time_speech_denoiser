@@ -1,10 +1,10 @@
 import numpy as np
 
 # from src.conv_tasnet import
-from .preprocess import preprocess
-from .train import train
+from src.DCCRN.preprocess import preprocess
+from src.DCCRN.train import train
 import torch
-from .data import AudioDataset, AudioDataLoader
+from src.DCCRN.data import AudioDataset, AudioDataLoader
 
 # Trying to imitate the run.sh script from the original github
 

@@ -19,7 +19,7 @@ import cProfile
 class FullsubnetProcessor(Processor):
     """Reduce noise in the audio.
     """
-    def __init__(self, model_path, should_overlap=False, ratio_power=1, sample_size=4):
+    def __init__(self, model_path, should_load=False, should_overlap=False, ratio_power=1, sample_size=4):
         """Initialize a Multiplier processor.
 
         Args:
@@ -57,41 +57,22 @@ class FullsubnetProcessor(Processor):
             device=device,
         )
 
-        checkpoint = torch.load(model_path)
-        self.model.load_state_dict(checkpoint['model'])
+        if should_load:
+            checkpoint = torch.load(model_path)
+            self.model.load_state_dict(checkpoint['model'])
+
         self.should_overlap = should_overlap
         if self.should_overlap:
             self.previous_original = None
         self.ratio_power = ratio_power
 
     def clean_noise(self, samples):
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
         """Use the DCCRN model and clean the noise from the given samples.
-
         Args:
             samples (list): List of samples to clean from noise.
         """
         # Pass the audio through the DCCRN model
-        #clean = Inferencer.full_band_crm_mask(samples)
-        noisy_complex = torch.stft((torch.Tensor([samples])), n_fft=512, hop_length=256, window=torch.hann_window(512), return_complex=True).to(device)
-
-        noisy_mag = torch.abs(noisy_complex).unsqueeze(1)
-        # pr = cProfile.Profile()
-        # pr.enable()
-        noisy_mag = noisy_mag.to(device)
-
-        pred_crm = self.model(noisy_mag).detach().permute(0, 2, 3, 1).to(device)
-
-
-        # pr.disable()
-        # pr.print_stats(sort='time')
-
-        pred_crm = decompress_cIRM(pred_crm)
-        enhanced_real = pred_crm[..., 0] * noisy_complex.real - pred_crm[..., 1] * noisy_complex.imag
-        enhanced_imag = pred_crm[..., 1] * noisy_complex.real + pred_crm[..., 0] * noisy_complex.imag
-        enhanced_complex = torch.stack((enhanced_real, enhanced_imag), dim=-1)
-
-        estimated_samples = torch.istft(enhanced_complex, 512, 256)
+        estimated_samples, pred_crm = self.model(torch.Tensor([samples]))
 
         # Remove padding caused by the model
         with torch.no_grad():
