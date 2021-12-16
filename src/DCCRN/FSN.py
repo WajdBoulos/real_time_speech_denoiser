@@ -652,8 +652,9 @@ MAX_INT16 = np.iinfo(np.int16).max
 import torch
 import torch.nn as nn
 
+# from src.DCCRN.DCCRN import EPS
 
-class SequenceModel(nn.Module):
+class ComplexSequenceModel(nn.Module):
     def __init__(
             self,
             input_size,
@@ -679,7 +680,14 @@ class SequenceModel(nn.Module):
         super().__init__()
         # Sequence layer
         if sequence_model == "LSTM":
-            self.sequence_model = nn.LSTM(
+            self.sequence_model_real = nn.LSTM(
+                input_size=input_size,
+                hidden_size=hidden_size,
+                num_layers=num_layers,
+                batch_first=True,
+                bidirectional=bidirectional,
+            )
+            self.sequence_model_img = nn.LSTM(
                 input_size=input_size,
                 hidden_size=hidden_size,
                 num_layers=num_layers,
@@ -687,7 +695,14 @@ class SequenceModel(nn.Module):
                 bidirectional=bidirectional,
             )
         elif sequence_model == "GRU":
-            self.sequence_model = nn.GRU(
+            self.sequence_model_real = nn.GRU(
+                input_size=input_size,
+                hidden_size=hidden_size,
+                num_layers=num_layers,
+                batch_first=True,
+                bidirectional=bidirectional,
+            )
+            self.sequence_model_img = nn.GRU(
                 input_size=input_size,
                 hidden_size=hidden_size,
                 num_layers=num_layers,
@@ -699,10 +714,42 @@ class SequenceModel(nn.Module):
 
         # Fully connected layer
         if bidirectional:
-            self.fc_output_layer = nn.Linear(hidden_size * 2, output_size)
+            self.complex_fc_act_output_layer = ComplexLinearAct(hidden_size * 2, output_size, output_activate_function)
         else:
-            self.fc_output_layer = nn.Linear(hidden_size, output_size)
+            self.complex_fc_act_output_layer = ComplexLinearAct(hidden_size, output_size, output_activate_function)
 
+
+    def forward(self, x):
+        """
+        Args:
+            x: [B, C, F, T]
+        Returns:
+            [B, C, F, T]
+        """
+        assert x.dim() == 4
+        self.sequence_model_real.flatten_parameters()
+        self.sequence_model_img.flatten_parameters()
+
+        # contiguous 使元素在内存中连续，有利于模型优化，但分配了新的空间
+        # 建议在网络开始大量计算前使用一下
+        x = x.permute(0, 1, 3, 2).contiguous()  # [B, C, F, T] => [B, C, T, F]
+        sequence_out_real = self.sequence_model_real(x[:,0,:,:])[0] - self.sequence_model_img(x[:,1,:,:])[0]
+        sequence_out_img = self.sequence_model_real(x[:,1,:,:])[0] + self.sequence_model_img(x[:,0,:,:])[0]
+        output_real, output_img = self.complex_fc_act_output_layer(sequence_out_real, sequence_out_img)
+        output_real = output_real.unsqueeze(1)
+        output_img = output_img.unsqueeze(1)
+        output_real = output_real.permute(0, 1, 3, 2).contiguous()  # [B, C, T, F] => [B, C, F, T]
+        output_img = output_img.permute(0, 1, 3, 2).contiguous()  # [B, C, T, F] => [B, C, F, T]
+        output = torch.stack([output_real,output_img], dim=1)
+        return output
+
+
+class ComplexLinearAct(nn.Module):
+    """ One Complex Convolution as explained in paper, followed by activation and normalization"""
+    def __init__(self, input_size, output_size, output_activate_function):
+        super(ComplexLinearAct, self).__init__()
+        self.linear_real = nn.Linear(input_size, output_size)
+        self.linear_imag = nn.Linear(input_size, output_size)
         # Activation function layer
         if output_activate_function:
             if output_activate_function == "Tanh":
@@ -714,27 +761,73 @@ class SequenceModel(nn.Module):
             else:
                 raise NotImplementedError(f"Not implemented activation function {self.activate_function}")
 
+            self.act_real = self.activate_function
+            self.act_imag = self.activate_function
+
         self.output_activate_function = output_activate_function
 
-    def forward(self, x):
+    def forward(self, input_real, input_imag):
         """
-        Args:
-            x: [B, F, T]
-        Returns:
-            [B, F, T]
+        :param input_real: shape [Batch, input_size, F, T]
+        :param input_imag: shape [Batch, output_size, F, T]
         """
-        assert x.dim() == 3
-        self.sequence_model.flatten_parameters()
-
-        # contiguous 使元素在内存中连续，有利于模型优化，但分配了新的空间
-        # 建议在网络开始大量计算前使用一下
-        x = x.permute(0, 2, 1).contiguous()  # [B, F, T] => [B, T, F]
-        o, _ = self.sequence_model(x)
-        o = self.fc_output_layer(o)
+        output_real = self.linear_real(input_real) - self.linear_imag(input_imag)
+        output_imag = self.linear_real(input_imag) + self.linear_imag(input_real)
         if self.output_activate_function:
-            o = self.activate_function(o)
-        o = o.permute(0, 2, 1).contiguous()  # [B, T, F] => [B, F, T]
-        return o
+            output_real = self.act_real(output_real)
+            output_imag = self.act_imag(output_imag)
+        return output_real, output_imag
+
+
+def choose_norm(norm_type, channel_size):
+    """ Currently only BN gives good results"""
+    if norm_type == "CLN":
+        return ChannelwiseLayerNorm(channel_size)
+    else:
+        assert norm_type == 'BN'  # either CLN or BN. both are
+    return RealBatchNorm(channel_size)
+
+
+class RealBatchNorm(nn.Module):
+    """ Regular Batch norm on each of the inputs
+    Batch norm in train mode isn't causal"""
+
+    def __init__(self, channel_size):
+        super(RealBatchNorm, self).__init__()
+        self.batch_norm_real = nn.BatchNorm2d(channel_size)
+        self.batch_norm_imag = nn.BatchNorm2d(channel_size)
+
+    def forward(self, real_input, imag_input):
+        return self.batch_norm_real(real_input), self.batch_norm_imag(imag_input)
+
+
+class ChannelwiseLayerNorm(nn.Module):
+    """Channel-wise Layer Normalization (cLN). Currently doesn't give good results"""
+
+    def __init__(self, channel_size):
+        super(ChannelwiseLayerNorm, self).__init__()
+        self.gamma_real = nn.Parameter(torch.Tensor(1, channel_size, 1, 1))
+        self.beta_real = nn.Parameter(torch.Tensor(1, channel_size, 1, 1))
+        self.gamma_imag = nn.Parameter(torch.Tensor(1, channel_size, 1, 1))
+        self.beta_imag = nn.Parameter(torch.Tensor(1, channel_size, 1, 1))
+        self.reset_parameters()
+
+    def reset_parameters(self):
+        self.gamma_real.data.fill_(1)
+        self.gamma_imag.data.fill_(1)
+        self.beta_real.data.zero_()
+        self.beta_imag.data.zero_()
+
+    def forward(self, y_real, y_imag):
+        mean_real = torch.mean(y_real, dim=1, keepdim=True)  # [M, 1, Freq, T]
+        var_real = torch.var(y_real, dim=1, keepdim=True, unbiased=False)  # [M, 1, Freq, T]
+        cLN_y_real = self.gamma_real * (y_real - mean_real) / torch.pow(var_real + EPSILON, 0.5) + self.beta_real
+
+        mean_imag = torch.mean(y_imag, dim=1, keepdim=True)  # [M, 1, Freq, T]
+        var_imag = torch.var(y_imag, dim=1, keepdim=True, unbiased=False)  # [M, 1, Freq, T]
+        cLN_y_imag = self.gamma_imag * (y_imag - mean_imag) / torch.pow(var_imag + EPSILON, 0.5) + self.beta_imag
+
+        return cLN_y_real, cLN_y_imag
 
 
 def _print_networks(nets: list):
@@ -755,8 +848,8 @@ if __name__ == '__main__':
     import datetime
 
     with torch.no_grad():
-        ipt = torch.rand(1, 257, 1000)
-        model = SequenceModel(
+        ipt = torch.rand(1, 2, 257, 1000)
+        model = ComplexSequenceModel(
             input_size=257,
             output_size=2,
             hidden_size=512,
@@ -770,6 +863,7 @@ if __name__ == '__main__':
         end = datetime.datetime.now()
         print(f"{end - start}")
         _print_networks([model, ])
+
 
 
 #wbasemodel
@@ -1180,13 +1274,28 @@ import sys
 #from audio_zen.acoustics.feature import drop_band
 #from audio_zen.model.base_model import BaseModel
 #from audio_zen.model.module.sequence_model import SequenceModel
-import cProfile
+
+#
+# from src.FullSubNet.audio_zen.acoustics.feature import drop_band
+# from src.FullSubNet.audio_zen.model.base_model import BaseModel
+# from src.FullSubNet.audio_zen.model.module.sequence_model import ComplexSequenceModel
+# import cProfile
+
 
 def runFB(fb, arg):
     a = fb(arg)
     return a
+
+
 def runSB(fb, arg):
     return fb(arg)
+
+
+def decompress_cIRM(mask, K=10, limit=9.9):
+    mask = limit * (mask >= limit) - limit * (mask <= -limit) + mask * (torch.abs(mask) < limit)
+    mask = -K * torch.log((K - mask) / (K + mask))
+    return mask
+
 
 class Model(BaseModel):
     def __init__(self,
@@ -1202,6 +1311,8 @@ class Model(BaseModel):
                  norm_type="offline_laplace_norm",
                  num_groups_in_drop_band=2,
                  weight_init=True,
+                 device="cuda",
+                 decompress_mask=True
                  ):
         """
         FullSubNet model (cIRM mask)
@@ -1215,20 +1326,21 @@ class Model(BaseModel):
         super().__init__()
         assert sequence_model in ("GRU", "LSTM"), f"{self.__class__.__name__} only support GRU and LSTM."
 
-        sb_num_neighbors=15
-        fb_num_neighbors=0
-        num_freqs=257
-        look_ahead=2
-        sequence_model="LSTM"
-        fb_output_activate_function="ReLU"
-        sb_output_activate_function=None
-        fb_model_hidden_size=512
-        sb_model_hidden_size=384
-        weight_init=False
-        norm_type="offline_laplace_norm"
-        num_groups_in_drop_band=2
+        sb_num_neighbors = 15
+        fb_num_neighbors = 0
+        num_freqs = 257
+        look_ahead = 2
+        sequence_model = "LSTM"
+        fb_output_activate_function = "ReLU"
+        sb_output_activate_function = None
+        fb_model_hidden_size = 512
+        sb_model_hidden_size = 194
+        weight_init = False
+        norm_type = "offline_laplace_norm"
+        num_groups_in_drop_band = 1
+        device = device
 
-        self.fb_model = SequenceModel(
+        self.fb_model = ComplexSequenceModel(
             input_size=num_freqs,
             output_size=num_freqs,
             hidden_size=fb_model_hidden_size,
@@ -1238,9 +1350,9 @@ class Model(BaseModel):
             output_activate_function=fb_output_activate_function
         )
 
-        self.sb_model = SequenceModel(
+        self.sb_model = ComplexSequenceModel(
             input_size=(sb_num_neighbors * 2 + 1) + (fb_num_neighbors * 2 + 1),
-            output_size=2,
+            output_size=1,
             hidden_size=sb_model_hidden_size,
             num_layers=2,
             bidirectional=False,
@@ -1253,75 +1365,97 @@ class Model(BaseModel):
         self.look_ahead = look_ahead
         self.norm = self.norm_wrapper(norm_type)
         self.num_groups_in_drop_band = num_groups_in_drop_band
+        self.device = device
+        self.decompress_mask = decompress_mask
+
+        self.to(device)
 
         if weight_init:
             self.apply(self.weight_init)
 
-    def forward(self, noisy_mag):
+    def forward(self, noisy_sound: torch.tensor):
         """
         Args:
-            noisy_mag: noisy magnitude spectrogram
+            noisy_sound: Batched sound tensor input
 
         Returns:
-            The real part and imag part of the enhanced spectrogram
+            clean batched sound tensor
 
         Shapes:
-            noisy_mag: [B, 1, F, T]
-            return: [B, 2, F, T]
+            noisy_sound: [B, T]
+            return: [B, T]
         """
-        assert noisy_mag.dim() == 4
-        noisy_mag = functional.pad(noisy_mag, [0, self.look_ahead])  # Pad the look ahead
-        batch_size, num_channels, num_freqs, num_frames = noisy_mag.size()
-        assert num_channels == 1, f"{self.__class__.__name__} takes the mag feature as inputs."
+        assert noisy_sound.dim() == 2, f"{self.__class__.__name__} takes the input as real."
+
+        noisy_sound = noisy_sound.to(self.device)
+        noisy_complex = torch.stft(noisy_sound, n_fft=512, hop_length=256, window=torch.hann_window(512).to(self.device), return_complex=False)
+        # [B, F, T, C] -> [B, C, F, T]
+        noisy_complex = noisy_complex.permute(0,3,1,2).contiguous()
+
+        noisy_padded_complex = functional.pad(noisy_complex, [0, self.look_ahead])  # Pad the look ahead
+        batch_size, num_channels, num_freqs, num_frames = noisy_padded_complex.size()
+        assert num_channels == 2
 
         # Fullband model
-        fb_input = self.norm(noisy_mag).reshape(batch_size, num_channels * num_freqs, num_frames)
+        fb_input = self.norm(noisy_padded_complex).reshape(batch_size, num_channels, num_freqs, num_frames)
         #pr = cProfile.Profile()
         #pr.enable()
 
-        fb_output = runFB(self.fb_model, fb_input).reshape(batch_size, 1, num_freqs, num_frames)
-
+        assert fb_input.dim() == 4
+        fb_output = runFB(self.fb_model, fb_input).reshape(batch_size, num_channels, num_freqs, num_frames)
 
         #pr.disable()
         #pr.print_stats(sort='time')
 
         # Unfold the output of the fullband model, [B, N=F, C, F_f, T]
         fb_output_unfolded = self.unfold(fb_output, num_neighbor=self.fb_num_neighbors)
-        fb_output_unfolded = fb_output_unfolded.reshape(batch_size, num_freqs, self.fb_num_neighbors * 2 + 1, num_frames)
+        fb_output_unfolded = fb_output_unfolded.reshape(batch_size, num_freqs, num_channels, self.fb_num_neighbors * 2 + 1, num_frames)
 
         # Unfold noisy input, [B, N=F, C, F_s, T]
-        noisy_mag_unfolded = self.unfold(noisy_mag, num_neighbor=self.sb_num_neighbors)
-        noisy_mag_unfolded = noisy_mag_unfolded.reshape(batch_size, num_freqs, self.sb_num_neighbors * 2 + 1, num_frames)
+        noisy_complex_unfolded = self.unfold(noisy_padded_complex, num_neighbor=self.sb_num_neighbors)
+        noisy_complex_unfolded = noisy_complex_unfolded.reshape(batch_size, num_freqs, num_channels, self.sb_num_neighbors * 2 + 1, num_frames)
 
-        # Concatenation, [B, F, (F_s + F_f), T]
-        sb_input = torch.cat([noisy_mag_unfolded, fb_output_unfolded], dim=2)
-        sb_input = self.norm(sb_input)
+        # Concatenation, [B, F, C, (F_s + F_f), T]
+        sb_input = torch.cat([noisy_complex_unfolded, fb_output_unfolded], dim=3)
+        sb_input = self.norm(sb_input).reshape(batch_size, num_freqs, num_channels, (self.fb_num_neighbors * 2 + 1) +
+                                               (self.sb_num_neighbors * 2 + 1), num_frames)
 
         # Speeding up training without significant performance degradation. These will be updated to the paper later.
-        if batch_size > 1:
-            sb_input = drop_band(sb_input.permute(0, 2, 1, 3), num_groups=self.num_groups_in_drop_band)  # [B, (F_s + F_f), F//num_groups, T]
-            num_freqs = sb_input.shape[2]
-            sb_input = sb_input.permute(0, 2, 1, 3)  # [B, F//num_groups, (F_s + F_f), T]
+        #TODO: enable the bellow optimization to support complex processing
+        #if batch_size > 1:
+        #    sb_input = drop_band(sb_input.permute(0, 2, 1, 3), num_groups=self.num_groups_in_drop_band)  # [B, (F_s + F_f), F//num_groups, T]
+        #    num_freqs = sb_input.shape[2]
+        #    sb_input = sb_input.permute(0, 2, 1, 3)  # [B, F//num_groups, (F_s + F_f), T]
 
+        # [B * F, C, (F_s + F_f), T]
         sb_input = sb_input.reshape(
-            batch_size * num_freqs,
+            batch_size * num_freqs, num_channels,
             (self.sb_num_neighbors * 2 + 1) + (self.fb_num_neighbors * 2 + 1),
             num_frames
         )
 
-        # [B * F, (F_s + F_f), T] => [B * F, 2, T] => [B, F, 2, T]
+        # [B * F, C, (F_s + F_f), T] => [B * F, 2, T] => [B, F, 2, T]
         #pr = cProfile.Profile()
         #pr.enable()
-
         sb_mask = runSB(self.sb_model, sb_input)
 
 
         #pr.disable()
         #pr.print_stats(sort='time')
+        # [B, F, 2, T] => [B, 2, F, T]
         sb_mask = sb_mask.reshape(batch_size, num_freqs, 2, num_frames).permute(0, 2, 1, 3).contiguous()
 
-        output = sb_mask[:, :, :, self.look_ahead:]
-        return output
+        sb_mask = sb_mask[:, :, :, self.look_ahead:]
+        if self.decompress_mask:
+            sb_mask = decompress_cIRM(sb_mask)
+
+        enhanced_real = sb_mask[:, 0, :, :] * noisy_complex[:, 0, :, :] - sb_mask[:, 1, :, :] * noisy_complex[:, 1, :, :]
+        enhanced_imag = sb_mask[:, 1, :, :] * noisy_complex[:, 0, :, :] + sb_mask[:, 0, :, :] * noisy_complex[:, 1, :, :]
+        enhanced_complex = torch.stack((enhanced_real, enhanced_imag), dim=-1)
+
+        estimated_samples = torch.istft(enhanced_complex, 512, 256)
+
+        return estimated_samples, sb_mask
 
     @classmethod
     def load_model(cls, path):
@@ -1350,6 +1484,7 @@ class Model(BaseModel):
         return package
 
 
+
 if __name__ == "__main__":
     import datetime
 
@@ -1376,17 +1511,15 @@ if __name__ == "__main__":
         # 100 frames (1.6s) - 0.62s (38.75%，纯模型) - 0.65s
         start = datetime.datetime.now()
 
-        complex_tensor = torch.stft(ipt, n_fft=512, hop_length=256)
-        mag = (complex_tensor.pow(2.).sum(-1) + 1e-8).pow(0.5 * 1.0).unsqueeze(1)
-        print(f"STFT: {datetime.datetime.now() - start}, {mag.shape}")
-
-        enhanced_complex_tensor = model(mag).detach().permute(0, 2, 3, 1)
-        print(enhanced_complex_tensor.shape)
+        enhanced_tensor, mask = model(ipt)
+        enhanced_tensor, mask = enhanced_tensor.detach(), mask.permute(0,2,3,1).detach()
+        print(enhanced_tensor.shape, mask.shape)
         print(f"Model Inference: {datetime.datetime.now() - start}")
 
-        enhanced = torch.istft(enhanced_complex_tensor, 512, 256, length=ipt_len)
+        enhanced = torch.istft(mask, 512, 256, length=ipt_len)
         print(f"iSTFT: {datetime.datetime.now() - start}")
 
         print(f"{datetime.datetime.now() - start}")
-        ipt = torch.rand(3, 1, 257, 200)
-        print(model(ipt).shape)
+        ipt = torch.rand(3, 800)
+        enhanced_tensor, mask = model(ipt)
+        print(enhanced_tensor.shape, mask.shape)

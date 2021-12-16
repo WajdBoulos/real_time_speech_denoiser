@@ -276,8 +276,7 @@ class Solver(object):
 
         with autocast(enabled=False):
             # [B, F, T] => [B, 1, F, T] => model => [B, 2, F, T] => [B, F, T, 2]
-            noisy_mag = noisy_mag.unsqueeze(1)
-            cRM = self.model(noisy_mag)
+            _, cRM = self.model(padded_mixture)
             cRM = cRM.permute(0, 2, 3, 1)
             loss = torch.nn.MSELoss()(ground_truth_cIRM, cRM)
 
