@@ -6,7 +6,7 @@
 import torch
 from data import AudioDataLoader, AudioDataset
 from solver import Solver
-from src.DeepComplexCRN.DCCRN import DCCRN
+from src.DCCRN import DCCRN
 from FSN import Model
 from torch.utils.data.dataset import random_split
 import math
@@ -86,9 +86,7 @@ def train(data_dir, epochs, batch_size, model_path, model_features_path, max_hou
     data = {'tr_loader': tr_loader, 'cv_loader': cv_loader}
 
     #model = DCCRN_DS(fft_len, win_len, hop_size, window, num_convs, enc_list, dec_list, 
-    model = DCCRN(fft_len, win_len, hop_size, window, num_convs, enc_list, dec_list,
-freq_kernel_size,
-                     time_kernel_size, stride, dilation, norm_type, rnn_type, num_layers, mask_type)
+
 
     model = Model(
         sb_num_neighbors=15,

@@ -260,10 +260,9 @@ class Solver(object):
         i = 0
         for (data_package) in tqdm(data_loader):
             padded_mixture, mixture_lengths, padded_clean_noise = data_package
-            if self.use_cuda:
-                padded_mixture = padded_mixture.cuda()
-                mixture_lengths = mixture_lengths.cuda()
-                padded_clean_noise = padded_clean_noise.cuda()
+            padded_mixture = padded_mixture.cuda()
+            mixture_lengths = mixture_lengths.cuda()
+            padded_clean_noise = padded_clean_noise.cuda()
 
         noisy_complex = torch.stft((padded_mixture).to(device), n_fft=512, hop_length=256, window=torch.hann_window(512).to(device), return_complex=True)
         clean_complex = torch.stft((padded_clean_noise[:, 0, :]).to(device), n_fft=512, hop_length=256, window=torch.hann_window(512).to(device), return_complex=True)
@@ -280,7 +279,7 @@ class Solver(object):
             noisy_mag = noisy_mag.unsqueeze(1)
             cRM = self.model(noisy_mag)
             cRM = cRM.permute(0, 2, 3, 1)
-            loss = torch.nn.MSELoss(ground_truth_cIRM, cRM)
+            loss = torch.nn.MSELoss()(ground_truth_cIRM, cRM)
 
             #estimate_source = self.model(padded_mixture)
             #source = padded_clean_noise[:, 0, :]  # first arg is source, second is noise

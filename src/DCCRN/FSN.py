@@ -1215,6 +1215,19 @@ class Model(BaseModel):
         super().__init__()
         assert sequence_model in ("GRU", "LSTM"), f"{self.__class__.__name__} only support GRU and LSTM."
 
+        sb_num_neighbors=15
+        fb_num_neighbors=0
+        num_freqs=257
+        look_ahead=2
+        sequence_model="LSTM"
+        fb_output_activate_function="ReLU"
+        sb_output_activate_function=None
+        fb_model_hidden_size=512
+        sb_model_hidden_size=384
+        weight_init=False
+        norm_type="offline_laplace_norm"
+        num_groups_in_drop_band=2
+
         self.fb_model = SequenceModel(
             input_size=num_freqs,
             output_size=num_freqs,
@@ -1309,6 +1322,32 @@ class Model(BaseModel):
 
         output = sb_mask[:, :, :, self.look_ahead:]
         return output
+
+    @classmethod
+    def load_model(cls, path):
+        # Load to CPU
+        package = torch.load(path, map_location=lambda storage, loc: storage)
+        model = cls.load_model_from_package(package)
+        return model
+
+    @classmethod
+    def load_model_from_package(cls, package):
+        model.load_state_dict(package['state_dict'])
+
+        return model
+
+    @staticmethod
+    def serialize(model, optimizer, epoch, tr_loss=None, cv_loss=None):
+        package = {
+            # state
+            'state_dict': model.state_dict(),
+            'optim_dict': optimizer.state_dict(),
+            'epoch': epoch
+        }
+        if tr_loss is not None:
+            package['tr_loss'] = tr_loss
+            package['cv_loss'] = cv_loss
+        return package
 
 
 if __name__ == "__main__":

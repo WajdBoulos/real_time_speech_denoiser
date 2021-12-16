@@ -5,24 +5,24 @@
 # $ pip install torch_stft
 
 # For AudioVisualizer
-matplotlib=3.3.2
-numpy=1.19.2
+matplotlib==3.3.2
+numpy==1.19.2
 
 # For microphone and speakers
-python-sounddevice=0.4.1
+#python-sounddevice
 
 # For run script
-pyyaml=5.4.1
+pyyaml==5.4.1
 
 # For DCCRN processor
-librosa=0.6.3
+librosa==0.6.3
 
-pytorch=1.7.1
-torchvision=0.8.2
-torchaudio=0.7.2
+torch==1.7.1
+torchvision==0.8.2
+torchaudio==0.7.2
 
-cudatoolkit # Use a version that works with the pytorch version and is installed on the computer
-numba=0.48
+#cudatoolkit # Use a version that works with the pytorch version and is installed on the computer
+numba==0.48
 ffmpeg
 
 # For file reader and writer
