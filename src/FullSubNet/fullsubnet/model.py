@@ -43,7 +43,7 @@ class Model(BaseModel):
                  norm_type="offline_laplace_norm",
                  num_groups_in_drop_band=2,
                  weight_init=True,
-                 device="cpu",
+                 device="cuda",
                  decompress_mask=True
                  ):
         """
@@ -106,7 +106,7 @@ class Model(BaseModel):
         assert noisy_sound.dim() == 2, f"{self.__class__.__name__} takes the input as real."
 
         noisy_sound = noisy_sound.to(self.device)
-        noisy_complex = torch.stft(noisy_sound, n_fft=512, hop_length=256, window=torch.hann_window(512), return_complex=False)
+        noisy_complex = torch.stft(noisy_sound, n_fft=512, hop_length=256, window=torch.hann_window(512).to(self.device), return_complex=False)
         # [B, F, T, C] -> [B, C, F, T]
         noisy_complex = noisy_complex.permute(0,3,1,2).contiguous()
 
