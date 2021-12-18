@@ -1447,15 +1447,15 @@ class Model(BaseModel):
 
         sb_mask = sb_mask[:, :, :, self.look_ahead:]
         if self.decompress_mask:
-            sb_mask = decompress_cIRM(sb_mask)
+            sb_mask_dec = decompress_cIRM(sb_mask)
 
-        enhanced_real = sb_mask[:, 0, :, :] * noisy_complex[:, 0, :, :] - sb_mask[:, 1, :, :] * noisy_complex[:, 1, :, :]
-        enhanced_imag = sb_mask[:, 1, :, :] * noisy_complex[:, 0, :, :] + sb_mask[:, 0, :, :] * noisy_complex[:, 1, :, :]
+        enhanced_real = sb_mask_dec[:, 0, :, :] * noisy_complex[:, 0, :, :] - sb_mask_dec[:, 1, :, :] * noisy_complex[:, 1, :, :]
+        enhanced_imag = sb_mask_dec[:, 1, :, :] * noisy_complex[:, 0, :, :] + sb_mask_dec[:, 0, :, :] * noisy_complex[:, 1, :, :]
         enhanced_complex = torch.stack((enhanced_real, enhanced_imag), dim=-1)
 
         estimated_samples = torch.istft(enhanced_complex, 512, 256)
 
-        return estimated_samples, sb_mask
+        return estimated_samples, sb_mask, sb_mask_dec
 
     @classmethod
     def load_model(cls, path):

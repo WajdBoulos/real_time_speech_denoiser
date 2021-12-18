@@ -269,14 +269,14 @@ class Solver(object):
 
         noisy_mag, _ = mag_phase(noisy_complex)
         ground_truth_cIRM = build_complex_ideal_ratio_mask(noisy_complex, clean_complex)  # [B, F, T, 2]
-        ground_truth_cIRM = drop_band(
-            ground_truth_cIRM.permute(0, 3, 1, 2),  # [B, 2, F ,T]
-            self.model.module.num_groups_in_drop_band
-        ).permute(0, 2, 3, 1)
+        # ground_truth_cIRM = drop_band(
+        #     ground_truth_cIRM.permute(0, 3, 1, 2),  # [B, 2, F ,T]
+        #     self.model.module.num_groups_in_drop_band
+        # ).permute(0, 2, 3, 1)
 
         with autocast(enabled=False):
             # [B, F, T] => [B, 1, F, T] => model => [B, 2, F, T] => [B, F, T, 2]
-            _, cRM = self.model(padded_mixture)
+            _, cRM , _ = self.model(padded_mixture)
             cRM = cRM.permute(0, 2, 3, 1)
             loss = torch.nn.MSELoss()(ground_truth_cIRM, cRM)
 
