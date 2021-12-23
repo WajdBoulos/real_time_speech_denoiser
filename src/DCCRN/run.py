@@ -14,20 +14,20 @@ from data import AudioDataset, AudioDataLoader
 # To open visdom (shows loss graphs), run this command: "python -m visdom.server", and then open in browser
 # http://localhost:8097
 
-data_dir = r"C:\Users\wajd_\Desktop\Technion\speech_denoiser_fork\\"
-json_dir = r"C:\Users\wajd_\Desktop\Technion\speech_denoiser_fork\\"
+data_dir = "/home/saba-junior@staff.technion.ac.il/"
+json_dir = "/home/saba-junior@staff.technion.ac.il/"
 
 #train_dir = data_dir + "tr"
 #valid_dir = data_dir + "cv"
 #test_dir = data_dir + "tt"
 
 id = 0
-epochs = 2
+epochs = 100
 
 # save and visualize
 
 continue_from = ""
-model_path = "DCCRN_sr_16k_batch_16_correct_BN_stft_lookahead.pth"
+model_path = "SubnetParams.pth"
 model_features_path = ""  # i tried playing with a model for a deep feature loss, but it didn't work. So keep this empty
 
 if __name__ == '__main__':

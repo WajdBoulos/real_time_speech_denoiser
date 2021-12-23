@@ -280,7 +280,7 @@ class Solver(object):
             noisy_mag = noisy_mag.unsqueeze(1)
             cRM = self.model(noisy_mag)
             cRM = cRM.permute(0, 2, 3, 1)
-            loss = torch.nn.MSELoss(ground_truth_cIRM, cRM)
+            loss = torch.nn.MSELoss()(ground_truth_cIRM, cRM)
 
             #estimate_source = self.model(padded_mixture)
             #source = padded_clean_noise[:, 0, :]  # first arg is source, second is noise
