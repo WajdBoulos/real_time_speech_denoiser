@@ -1,28 +1,6 @@
-
-
 import torch
 import torch.nn as nn
-
-# There is currently a bug in torch_stft, that causes the error message
-# "forrtl: error (200): program aborting due to control-C event"
-# to be printed when the user inserts ctrl-c, and then causes the program to exit,
-# instead of raising a python exception of KeyboardInterrupt.
-# This bug affects the python interpreter from the time of importing STFT, and not only when
-# trying to stop a run of STFT.
-# This workaround stops this problem, by disabling the catching of ctrl-c in STFT.
-# This means that pressing ctrl-c while STFT is in a long calculation will not stop it,
-# but it will allow the user to send ctrl-c in other places in the code and get the expected
-# behavior of the python interpreter catching the interrupt and letting the python code handle
-# the interrupt in any way it wants.
-# There is a more complex workaround that should fix this in a way that still allows ctrl-c
-# to stop any long calculation in STFT, but I felt that this workaround is less intrusive and
-# has a better chance of working everywhere, and there shouldn't be any long calculations in
-# STFT in this module anyway. For the complex solution, see https://stackoverflow.com/a/15472811
-import os
-os.environ['FOR_DISABLE_CONSOLE_CTRL_HANDLER'] = '1'
-
 from torch_stft import STFT
-
 import math
 import torch.nn.functional as functional
 from torch.autograd import Variable
@@ -257,19 +235,13 @@ class Separator(nn.Module):
         self.rnn = getattr(nn, rnn_type)(rnn_input_size, rnn_hidden_size, num_layers, batch_first=True,
                                          bidirectional=False)
         self.dense = nn.Linear(rnn_hidden_size, rnn_input_size)
-        self.hn = None
-        self.cn = None
-
-    def lstm_perform(self, input_data):
-        out, (self.hn, self.cn) = self.rnn(input_data)
-        return out
 
     def forward(self, encoded_real, encoded_imag):
         #  Concat real and imaginary, currently no complex LSTM
         concat_input = torch.cat((encoded_real, encoded_imag), dim=1)
         B, N, F, T = concat_input.shape
         concat_input = concat_input.view(B, -1, T).permute(0, 2, 1)  # [B, T, NF]
-        output_separator = self.dense(self.lstm_perform(concat_input)).permute(0, 2, 1)  # input to dense is also [B T NF]
+        output_separator = self.dense(self.rnn(concat_input)[0]).permute(0, 2, 1)  # input to dense is also [B T NF]
         output_separator = output_separator.view(B, N, F, T)
         separated_real, separated_imag = output_separator[:, :N // 2, :, :], output_separator[:, N // 2:, :, :]
         return separated_real, separated_imag

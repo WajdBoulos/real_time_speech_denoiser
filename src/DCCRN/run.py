@@ -22,19 +22,19 @@ json_dir = "/home/saba-junior@staff.technion.ac.il/"
 #test_dir = data_dir + "tt"
 
 id = 0
-epochs = 2
+epochs = 100
 
 # save and visualize
 
 continue_from = ""
-model_path = "DCCRN_sr_16k_batch_16_correct_BN_stft_lookahead.pth"
+model_path = "DCCRN_sr_16k_batch_16_correct_BN_stft_lookaheadNEWWAJDNEW.pth"
 model_features_path = ""  # i tried playing with a model for a deep feature loss, but it didn't work. So keep this empty
 
 if __name__ == '__main__':
     sample_rate = 16000
     preprocess(data_dir, json_dir, sample_rate)
 
-    batch_size = 4
+    batch_size = 16
     max_hours = None  # only use some of the data for tests. should be None when running on full dataset
     num_workers = 4
     train(data_dir, epochs, batch_size, model_path, model_features_path, max_hours=max_hours,
