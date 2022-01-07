@@ -14,8 +14,8 @@ from data import AudioDataset, AudioDataLoader
 # To open visdom (shows loss graphs), run this command: "python -m visdom.server", and then open in browser
 # http://localhost:8097
 
-data_dir = r"C:\Users\wajd_\Desktop\Technion\speech_denoiser_fork\\"
-json_dir = r"C:\Users\wajd_\Desktop\Technion\speech_denoiser_fork\\"
+data_dir = "/home/saba-junior@staff.technion.ac.il/"
+json_dir = "/home/saba-junior@staff.technion.ac.il/"
 
 #train_dir = data_dir + "tr"
 #valid_dir = data_dir + "cv"

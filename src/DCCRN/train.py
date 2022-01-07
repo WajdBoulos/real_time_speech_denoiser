@@ -7,7 +7,7 @@
 import torch
 from data import AudioDataLoader, AudioDataset
 from solver import Solver
-from src.DeepComplexCRN.DCCRN import DCCRN
+from src.DCCRN.DCCRN import DCCRN
 from torch.utils.data.dataset import random_split
 import math
 from fairseq.models.wav2vec import Wav2VecModel

@@ -261,10 +261,7 @@ class Separator(nn.Module):
         self.cn = None
 
     def lstm_perform(self, input_data):
-        if self.hn is None:
-            out, (self.hn, self.cn) = self.rnn(input_data)
-        else:
-            out, (self.hn, self.cn) = self.rnn(input_data, (self.hn, self.cn))
+        out, (self.hn, self.cn) = self.rnn(input_data)
         return out
 
     def forward(self, encoded_real, encoded_imag):
