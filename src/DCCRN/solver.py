@@ -1,5 +1,11 @@
 # Created on 2018/12
 # Author: Kaituo XU
+
+def decompress_cIRM(mask, K=10, limit=9.9):
+    mask = limit * (mask >= limit) - limit * (mask <= -limit) + mask * (torch.abs(mask) < limit)
+    mask = -K * torch.log((K - mask) / (K + mask))
+    return mask
+
 def compress_cIRM(mask, K=10, C=0.1):
     """
         Compress from (-inf, +inf) to [-K ~ K]
@@ -265,29 +271,25 @@ class Solver(object):
                 mixture_lengths = mixture_lengths.cuda()
                 padded_clean_noise = padded_clean_noise.cuda()
 
-        noisy_complex = torch.stft((padded_mixture).to(device), n_fft=512, hop_length=256, window=torch.hann_window(512).to(device), return_complex=True)
-        clean_complex = torch.stft((padded_clean_noise[:, 0, :]).to(device), n_fft=512, hop_length=256, window=torch.hann_window(512).to(device), return_complex=True)
-
-        noisy_mag, _ = mag_phase(noisy_complex)
-        ground_truth_cIRM = build_complex_ideal_ratio_mask(noisy_complex, clean_complex)  # [B, F, T, 2]
-        if not False:
-            ground_truth_cIRM = drop_band(
-                ground_truth_cIRM.permute(0, 3, 1, 2),  # [B, 2, F ,T]
-                self.model.module.num_groups_in_drop_band
-            ).permute(0, 2, 3, 1)
-        else:
-            ground_truth_cIRM = build_complex_ideal_ratio_mask(noisy_complex, clean_complex)  # [B, F, T, 2]
-
-        with autocast(enabled=False):
-            # [B, F, T] => [B, 1, F, T] => model => [B, 2, F, T] => [B, F, T, 2]
+            noisy_complex = torch.stft((padded_mixture).to(device), n_fft=512, hop_length=256,
+                                       window=torch.hann_window(512).to(device), return_complex=True)
+            noisy_mag, _ = mag_phase(noisy_complex)
             noisy_mag = noisy_mag.unsqueeze(1)
-            cRM = self.model(noisy_mag)
-            cRM = cRM.permute(0, 2, 3, 1)
-            loss = torch.nn.MSELoss()(ground_truth_cIRM, cRM)
 
-            #estimate_source = self.model(padded_mixture)
-            #source = padded_clean_noise[:, 0, :]  # first arg is source, second is noise
-            #loss = cal_loss(source, estimate_source, mixture_lengths, device, features_model=self.deep_features_model)
+            pred_crm = self.model(noisy_mag).permute(0, 2, 3, 1).to(device)
+
+            # pr.disable()
+            # pr.print_stats(sort='time')
+
+            pred_crm = decompress_cIRM(pred_crm)
+            enhanced_real = pred_crm[..., 0] * noisy_complex.real - pred_crm[..., 1] * noisy_complex.imag
+            enhanced_imag = pred_crm[..., 1] * noisy_complex.real + pred_crm[..., 0] * noisy_complex.imag
+            enhanced_complex = torch.stack((enhanced_real, enhanced_imag), dim=-1)
+
+            estimate_source = torch.istft(enhanced_complex, 512, 256)
+
+            source = padded_clean_noise[:, 0, :]  # first arg is source, second is noise
+            loss = cal_loss(source, estimate_source, mixture_lengths, device, features_model=self.deep_features_model)
             if not cross_valid:
                 self.optimizer.zero_grad()
                 loss.backward()

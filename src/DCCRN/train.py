@@ -48,7 +48,7 @@ def train(data_dir, epochs, batch_size, model_path, model_features_path, max_hou
     num_workers = 4
     # optimizer
     optimizer_type = "adam"
-    lr = 5e-4
+    lr = 1e-3
     momentum = 0
     l2 = 0  # Weight decay - l2 norm
 
@@ -102,7 +102,7 @@ def train(data_dir, epochs, batch_size, model_path, model_features_path, max_hou
         sb_model_hidden_size=384,
         weight_init=False,
         norm_type="offline_laplace_norm",
-        num_groups_in_drop_band=2,
+        num_groups_in_drop_band=1
     )
 
     if use_cuda:
