@@ -55,11 +55,12 @@ class FullsubnetProcessor(Processor):
             sb_model_hidden_size=384,
             weight_init=False,
             norm_type="offline_laplace_norm",
-            num_groups_in_drop_band=2,
+            num_groups_in_drop_band=1,
         )
 
-        checkpoint = torch.load(model_path)
-        self.model.load_state_dict(checkpoint['model'])
+        package = torch.load(model_path, map_location=lambda storage, loc: storage)
+        self.model.load_state_dict(package['state_dict'])
+
         self.should_overlap = should_overlap
         if self.should_overlap:
             self.previous_original = None
@@ -76,7 +77,7 @@ class FullsubnetProcessor(Processor):
         """
         # Pass the audio through the DCCRN model
         #clean = Inferencer.full_band_crm_mask(samples)
-        noisy_complex = torch.stft((torch.Tensor([samples])), n_fft=512, hop_length=256, window=torch.hann_window(512), return_complex=True).to(device)
+        noisy_complex = torch.stft((torch.Tensor([samples])).to(device), n_fft=512, hop_length=256, window=torch.hann_window(512).to(device), return_complex=True).to(device)
 
         noisy_mag = torch.abs(noisy_complex).unsqueeze(1)
         # pr = cProfile.Profile()

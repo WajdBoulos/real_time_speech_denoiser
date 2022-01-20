@@ -5,6 +5,7 @@ from preprocess import preprocess
 from train import train
 import torch
 from data import AudioDataset, AudioDataLoader
+print(torch.__version__)
 
 # Trying to imitate the run.sh script from the original github
 
@@ -27,7 +28,7 @@ epochs = 2
 # save and visualize
 
 continue_from = ""
-model_path = "DCCRN_sr_16k_batch_16_correct_BN_stft_lookahead.pth"
+model_path = "DCCRN_sr_16k_batch_16_correct_BN_stft_lookaheadTEST.pth"
 model_features_path = ""  # i tried playing with a model for a deep feature loss, but it didn't work. So keep this empty
 
 if __name__ == '__main__':
