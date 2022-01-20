@@ -7,7 +7,7 @@ from __future__ import absolute_import
 
 from .reader import Reader
 import soundfile as sf
-
+import time
 class FileReader(Reader):
     """Read audio from a file and send each block of samples to a writer.
     """
@@ -64,20 +64,24 @@ class FileReader(Reader):
         while not self.writer.wait():
             # Read the audio data from the file
             if self.wav_format:
-                data = self.sf.buffer_read(self.blocksize, dtype=self.dtype)
+                data = self.sf.buffer_read(dtype=self.dtype)
+                self.blocksize = len(data)
             else:
                 data = self.file.read(self.blocksize * self.sample_size)
 
-            # Check that we read a full block of data
-            if len(data) != (self.blocksize * self.sample_size):
-                print("reached end of input file")
-                break
+
 
             # Convert the data to a bytearray to conform to the API
             data = bytearray(data)
 
             # Send the data to the writer
             self.writer.data_ready(data)
+
+            # Check that we read a full block of data
+            if len(data) != (self.blocksize * self.sample_size):
+                time.sleep(20)
+                print("reached end of input file")
+                break
 
         # Close the file
         print("closing input file")

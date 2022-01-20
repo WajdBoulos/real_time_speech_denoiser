@@ -4,6 +4,8 @@
 """
 
 from __future__ import absolute_import
+import wave, struct, math, random
+import scipy
 
 from src.FullSubNet.audio_zen.acoustics.feature import mag_phase
 from .processor import Processor
@@ -66,7 +68,7 @@ class FullsubnetProcessor(Processor):
             self.previous_original = None
         self.ratio_power = ratio_power
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        (self.model).to(device)
+        (self.model) 
 
     def clean_noise(self, samples):
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -77,14 +79,14 @@ class FullsubnetProcessor(Processor):
         """
         # Pass the audio through the DCCRN model
         #clean = Inferencer.full_band_crm_mask(samples)
-        noisy_complex = torch.stft((torch.Tensor([samples])).to(device), n_fft=512, hop_length=256, window=torch.hann_window(512).to(device), return_complex=True).to(device)
+        noisy_complex = torch.stft((torch.Tensor([samples])) , n_fft=512, hop_length=256, window=torch.hann_window(512) , return_complex=True) 
 
         noisy_mag = torch.abs(noisy_complex).unsqueeze(1)
         # pr = cProfile.Profile()
         # pr.enable()
-        noisy_mag = noisy_mag.to(device)
+        noisy_mag = noisy_mag 
 
-        pred_crm = self.model(noisy_mag).detach().permute(0, 2, 3, 1).to(device)
+        pred_crm = self.model(noisy_mag).detach().permute(0, 2, 3, 1) 
 
 
         # pr.disable()
@@ -113,7 +115,7 @@ class FullsubnetProcessor(Processor):
         # Convert the raw data to a list of samples
         samples = raw_samples_to_array(data, self.sample_size)
 
-        if self.should_overlap:
+        if False:
             if self.previous_original is None:
                 # Save the last window, zero the current window, and return
                 self.previous_original = samples
@@ -138,7 +140,14 @@ class FullsubnetProcessor(Processor):
             clean_samples = self.clean_noise(samples)
 
         # Convert the samples back to data
-        array_to_raw_samples(clean_samples, data, self.sample_size)
+        scipy.io.wavfile.write("filename.wav", 16000, clean_samples)
+        # array_to_raw_samples(clean_samples, data, self.sample_size)
+        # obj = wave.open('sound.wav','w')
+        # obj.setnchannels(1) # mono
+        # obj.setsampwidth(2)
+        # obj.setframerate(16000)
+        # obj.writeframesraw( clean_samples )
+        # obj.close()
 
 
     def wait(self):
