@@ -4,6 +4,7 @@
 """
 
 from __future__ import absolute_import
+import scipy
 
 from .processor import Processor
 
@@ -69,7 +70,7 @@ class DCCRNProcessor(Processor):
         # Convert the raw data to a list of samples
         samples = raw_samples_to_array(data, self.sample_size)
 
-        if self.should_overlap:
+        if False:
             if self.previous_original is None:
                 # Save the last window, zero the current window, and return
                 self.previous_original = samples
@@ -95,6 +96,8 @@ class DCCRNProcessor(Processor):
 
         # Convert the samples back to data
         array_to_raw_samples(clean_samples, data, self.sample_size)
+        scipy.io.wavfile.write("filename.wav", 16000, clean_samples)
+
 
 
     def wait(self):

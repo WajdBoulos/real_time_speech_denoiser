@@ -1,5 +1,5 @@
 {
-  "reader": {"type":"file_reader", "args":{"path":"MosTest/ms_realrec_headset_typing_spk1_4.wav", "blocksize":32768, "sample_size":4}},
+  "reader": {"type":"file_reader", "args":{"path":"MosTest/clnsp218_ilTSWXPYT2U_snr10_tl-17_fileid_274.wav", "blocksize":32768, "sample_size":4}},
   "pipeline": [
   {"type":"Fullsubnet_processor", "args":{"sample_size":4, "should_overlap":True, "ratio_power":1, "model_path":"models/SubnetParamsDBLETSGO2.pth"}},
   ],

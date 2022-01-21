@@ -6,7 +6,7 @@
 from __future__ import absolute_import
 import wave, struct, math, random
 import scipy
-
+import numpy as np
 from src.FullSubNet.audio_zen.acoustics.feature import mag_phase
 from .processor import Processor
 
@@ -138,6 +138,10 @@ class FullsubnetProcessor(Processor):
         else:
             # Estimate the clean samples using the model
             clean_samples = self.clean_noise(samples)
+            i_pow = (np.sum(np.abs(np.array(samples))**2))
+            o_pow = (np.sum(np.abs(np.array(clean_samples))**2))
+            #print(np.sqrt(i_pow / o_pow))
+            clean_samples = clean_samples * np.sqrt(i_pow / o_pow)
 
         # Convert the samples back to data
         scipy.io.wavfile.write("filename.wav", 16000, clean_samples)
