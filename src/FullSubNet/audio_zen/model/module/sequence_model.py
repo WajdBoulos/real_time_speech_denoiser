@@ -62,8 +62,18 @@ class SequenceModel(nn.Module):
                 self.activate_function = nn.ReLU6()
             else:
                 raise NotImplementedError(f"Not implemented activation function {self.activate_function}")
-
         self.output_activate_function = output_activate_function
+        self.hn = None
+        self.cn = None
+
+    def lstm_perform(self, input_data):
+        if self.hn is None:
+            out, (self.hn, self.cn) = self.sequence_model(input_data)
+        else:
+            out, (self.hn, self.cn) = self.sequence_model(input_data, (self.hn, self.cn))
+        self.hn = self.hn.detach()
+        self.cn = self.cn.detach()
+        return out
 
     def forward(self, x):
         """
@@ -78,7 +88,7 @@ class SequenceModel(nn.Module):
         # contiguous 使元素在内存中连续，有利于模型优化，但分配了新的空间
         # 建议在网络开始大量计算前使用一下
         x = x.permute(0, 2, 1).contiguous()  # [B, F, T] => [B, T, F]
-        o, _ = self.sequence_model(x)
+        o = self.lstm_perform(x)
         o = self.fc_output_layer(o)
         if self.output_activate_function:
             o = self.activate_function(o)
