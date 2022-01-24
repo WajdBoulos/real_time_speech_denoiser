@@ -4,7 +4,6 @@
 """
 
 from __future__ import absolute_import
-import scipy
 
 from .processor import Processor
 
@@ -19,7 +18,7 @@ class DCCRNProcessor(Processor):
     """
     def __init__(self, model_path, should_overlap=True, ratio_power=1, sample_size=4):
         """Initialize a Multiplier processor.
-        
+
         Args:
             model_path (str):       Path to the model to use in the DCCRN NN.
             should_overlap (bool):  Should the processor be run in a delay of one block, in order to overlap each block
@@ -70,7 +69,7 @@ class DCCRNProcessor(Processor):
         # Convert the raw data to a list of samples
         samples = raw_samples_to_array(data, self.sample_size)
 
-        if False:
+        if self.should_overlap:
             if self.previous_original is None:
                 # Save the last window, zero the current window, and return
                 self.previous_original = samples
@@ -96,8 +95,6 @@ class DCCRNProcessor(Processor):
 
         # Convert the samples back to data
         array_to_raw_samples(clean_samples, data, self.sample_size)
-        scipy.io.wavfile.write("filename.wav", 16000, clean_samples)
-
 
 
     def wait(self):
