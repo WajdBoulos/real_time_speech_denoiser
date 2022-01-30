@@ -69,8 +69,7 @@ class FileReader(Reader):
             while not self.writer.wait():
                 # Read the audio data from the file
                 if self.wav_format:
-                    data = self.sf.buffer_read(-1, dtype=self.dtype)
-                    self.blocksize = len(data)
+                    data = self.sf.buffer_read(self.blocksize, dtype=self.dtype)
                 else:
                     data = self.file.read(self.blocksize * self.sample_size)
 

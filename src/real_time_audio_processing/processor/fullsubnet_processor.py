@@ -25,7 +25,7 @@ def decompress_cIRM(mask, K=10, limit=9.9):
 class FullsubnetProcessor(Processor):
     """Reduce noise in the audio.
     """
-    def __init__(self, model_path, should_overlap=False, ratio_power=1, sample_size=4):
+    def __init__(self, model_path, should_overlap=True, ratio_power=1, sample_size=4):
         """Initialize a Multiplier processor.
 
         Args:
@@ -62,7 +62,7 @@ class FullsubnetProcessor(Processor):
 
         package = torch.load(model_path, map_location=lambda storage, loc: storage)
         self.model.load_state_dict(package['state_dict'])
-
+        self.path = model_path
         self.should_overlap = should_overlap
         if self.should_overlap:
             self.previous_original = None
@@ -106,6 +106,30 @@ class FullsubnetProcessor(Processor):
         # Return a list of clean samples
         return clean_samples[0]
 
+    def reset(self):
+        self.model = Model(
+            sb_num_neighbors=15,
+            fb_num_neighbors=0,
+            num_freqs=257,
+            look_ahead=2,
+            sequence_model="LSTM",
+            fb_output_activate_function="ReLU",
+            sb_output_activate_function=None,
+            fb_model_hidden_size=512,
+            sb_model_hidden_size=384,
+            weight_init=False,
+            norm_type="offline_laplace_norm",
+            num_groups_in_drop_band=1,
+        )
+        package = torch.load(self.path, map_location=lambda storage, loc: storage)
+        self.model.load_state_dict(package['state_dict'])
+
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        (self.model).to(device)
+        self.previous_original = None
+        self.previous_processed = None
+
+
     def process(self, data):
         """Clean the data.
 
@@ -122,7 +146,7 @@ class FullsubnetProcessor(Processor):
                 cleaned_noise = self.clean_noise(samples)
                 i_pow = (np.sum(np.abs(np.array(samples))**2))
                 o_pow = (np.sum(np.abs(np.array(cleaned_noise))**2))
-                cleaned_noise = cleaned_noise * np.sqrt(i_pow / o_pow)
+                cleaned_noise = cleaned_noise * 0.1#np.sqrt(i_pow / o_pow)
 
                 self.previous_processed = [0] * len(samples) + list(cleaned_noise)
                 clean_samples = [0] * len(samples)
@@ -133,7 +157,7 @@ class FullsubnetProcessor(Processor):
             i_pow = (np.sum(np.abs(np.array(samples))**2))
             o_pow = (np.sum(np.abs(np.array(current_processed))**2))
             #print(np.sqrt(i_pow / o_pow))
-            current_processed = (current_processed) * np.sqrt(i_pow / o_pow)
+            current_processed = (current_processed) * 0.1#np.sqrt(i_pow / o_pow)
             # Generate the output vector by combining the end of the last window and the start of the current window
             combined_samples = []
             for i, (previous_sample, current_sample) in enumerate(zip(self.previous_processed[len(samples):], current_processed[:len(samples)])):
@@ -152,10 +176,10 @@ class FullsubnetProcessor(Processor):
             i_pow = (np.sum(np.abs(np.array(samples))**2))
             o_pow = (np.sum(np.abs(np.array(clean_samples))**2))
             #print(np.sqrt(i_pow / o_pow))
-            clean_samples = clean_samples * np.sqrt(i_pow / o_pow)
+            clean_samples = clean_samples * 0.1#np.sqrt(i_pow / o_pow)
             array_to_raw_samples(clean_samples, data, self.sample_size)
 
-        array_to_raw_samples(clean_samples, data, self.sample_size)
+        #array_to_raw_samples(clean_samples, data, self.sample_size)
         # Convert the samples back to data
         #scipy.io.wavfile.write("filename.wav", 16000, clean_samples)
         # array_to_raw_samples(clean_samples, data, self.sample_size)
@@ -175,5 +199,6 @@ class FullsubnetProcessor(Processor):
     def finalize(self):
         """Do nothing, as all the processing was done in the process function.
         """
+        self.reset()
         return
 

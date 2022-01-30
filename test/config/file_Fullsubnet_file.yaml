@@ -1,5 +1,5 @@
 {
-  "reader": {"type":"file_reader", "args":{"path":"MosTest/Recording2.wav", "blocksize":4096, "sample_size":4}},
+  "reader": {"type":"file_reader", "args":{"path":"MosTest/realrec_fileid_62.wav", "blocksize":4096, "sample_size":4}},
   "pipeline": [
   {"type":"Fullsubnet_processor", "args":{"sample_size":4, "should_overlap":True, "ratio_power":1, "model_path":"models/SubnetParamsDBLETSGO2.pth"}},
   ],
