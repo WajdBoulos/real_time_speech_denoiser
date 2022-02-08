@@ -1,5 +1,5 @@
 # This file may be used to create an environment using:
-# $ conda create --name <env> --file <this file> -c defaults -c conda-forge -c anaconda -c pytorch
+# $ conda create --name <env> --file <this file> -c defaults -c pytorch -c conda-forge -c anaconda
 # platform: win-64
 # After this, you need to install torch_stft from pip:
 # $ pip install torch_stft
@@ -17,9 +17,8 @@ pyyaml=5.4.1
 # For DCCRN processor
 librosa=0.6.3
 
-pytorch=1.7.1
-torchvision=0.8.2
-torchaudio=0.7.2
+pytorch=1.8.1
+torchaudio=0.8.1
 
 cudatoolkit # Use a version that works with the pytorch version and is installed on the computer
 numba=0.48
@@ -29,9 +28,9 @@ ffmpeg
 pysoundfile
 
 # for training
-#tqdm
-#visdom
-#mir_eval
+tqdm
+visdom
+mir_eval
 #pystoi
 #pesq
-#fairseq
+fairseq

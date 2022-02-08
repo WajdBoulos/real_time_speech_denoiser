@@ -14,8 +14,8 @@ from data import AudioDataset, AudioDataLoader
 # To open visdom (shows loss graphs), run this command: "python -m visdom.server", and then open in browser
 # http://localhost:8097
 
-data_dir = "/home/saba-junior@staff.technion.ac.il/"
-json_dir = "/home/saba-junior@staff.technion.ac.il/"
+data_dir = "/media/saba-junior@staff.technion.ac.il/hadas-win/DNS-Challenge/DNS-Challenge/datasets/"
+json_dir = "/media/saba-junior@staff.technion.ac.il/hadas-win/DNS-Challenge/DNS-Challenge/datasets/"
 
 #train_dir = data_dir + "tr"
 #valid_dir = data_dir + "cv"
