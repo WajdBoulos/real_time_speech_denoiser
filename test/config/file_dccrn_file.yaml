@@ -1,9 +1,9 @@
 {
-    "reader": {"type":"file_reader", "args":{"path":"MosTest/clnsp430_babble_188218_23_snr8_tl-22_fileid_280.wav", "blocksize":4096, "sample_size":4}},
+    "reader": {"type":"file_reader", "args":{"path":"MosTest/WajdDog3.wav", "blocksize":4096, "sample_size":4}},
     "pipeline": [
-        {"type":"DCCRN_processor", "args":{"sample_size":4, "should_overlap":True, "ratio_power":1, "model_path":"models/DCCRN_sr_16k_batch_16_correct_BN_stft_lookaheadNEWWAJDNEW.pth"}},
+        {"type":"DCCRN_processor", "args":{"sample_size":4, "should_overlap":True, "ratio_power":1, "model_path":"models/DCCRN_sr_16k_batch_16_correct_BN_stft_lookahead.pth"}},
     ],
     "writers": [
-        {"type":"file_writer", "args":{"path":"sp01_noisy_14dB_SG.wav", "blocking_time":0.0001}},
+        {"type":"file_writer", "args":{"path":"WajdDog3DCCRNPretrained.wav", "blocking_time":0.0001}},
     ],
 }

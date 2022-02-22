@@ -1,9 +1,9 @@
 {
     "reader": {"type":"multi_file_reader", "args":{"path":"MosTest", "blocksize":4096, "sample_size":4}},
     "pipeline": [
-        {"type":"Fullsubnet_processor", "args":{"sample_size":4, "should_overlap":True, "ratio_power":1, "model_path":"models/SubnetParamsDBLETSGO2.pth"}},
+        {"type":"Fullsubnet_processor", "args":{"sample_size":4, "should_overlap":True, "ratio_power":1, "model_path":"models/fullsubnet_best_model_58epochs.tar"}},
     ],
     "writers": [
-        {"type":"multi_file_writer", "args":{"path":"MosTest\\FullSubnet", "blocking_time":0.0001}},
+        {"type":"multi_file_writer", "args":{"path":"MosTest\\FullSubnetPreTrained", "blocking_time":0.0001}},
     ],
 }

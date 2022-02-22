@@ -61,7 +61,7 @@ class FullsubnetProcessor(Processor):
         )
 
         package = torch.load(model_path, map_location=lambda storage, loc: storage)
-        self.model.load_state_dict(package['state_dict'])
+        self.model.load_state_dict(package['model'])
         self.path = model_path
         self.should_overlap = should_overlap
         if self.should_overlap:
@@ -122,7 +122,7 @@ class FullsubnetProcessor(Processor):
             num_groups_in_drop_band=1,
         )
         package = torch.load(self.path, map_location=lambda storage, loc: storage)
-        self.model.load_state_dict(package['state_dict'])
+        self.model.load_state_dict(package['model'])
 
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
         (self.model).to(device)
@@ -146,7 +146,7 @@ class FullsubnetProcessor(Processor):
                 cleaned_noise = self.clean_noise(samples)
                 i_pow = (np.sum(np.abs(np.array(samples))**2))
                 o_pow = (np.sum(np.abs(np.array(cleaned_noise))**2))
-                cleaned_noise = cleaned_noise * 0.1#np.sqrt(i_pow / o_pow)
+                cleaned_noise = cleaned_noise * 1#np.sqrt(i_pow / o_pow)
 
                 self.previous_processed = [0] * len(samples) + list(cleaned_noise)
                 clean_samples = [0] * len(samples)
@@ -157,7 +157,7 @@ class FullsubnetProcessor(Processor):
             i_pow = (np.sum(np.abs(np.array(samples))**2))
             o_pow = (np.sum(np.abs(np.array(current_processed))**2))
             #print(np.sqrt(i_pow / o_pow))
-            current_processed = (current_processed) * 0.1#np.sqrt(i_pow / o_pow)
+            current_processed = (current_processed) * 1#np.sqrt(i_pow / o_pow)
             # Generate the output vector by combining the end of the last window and the start of the current window
             combined_samples = []
             for i, (previous_sample, current_sample) in enumerate(zip(self.previous_processed[len(samples):], current_processed[:len(samples)])):
@@ -176,7 +176,7 @@ class FullsubnetProcessor(Processor):
             i_pow = (np.sum(np.abs(np.array(samples))**2))
             o_pow = (np.sum(np.abs(np.array(clean_samples))**2))
             #print(np.sqrt(i_pow / o_pow))
-            clean_samples = clean_samples * 0.1#np.sqrt(i_pow / o_pow)
+            clean_samples = clean_samples * 1#np.sqrt(i_pow / o_pow)
             array_to_raw_samples(clean_samples, data, self.sample_size)
 
         #array_to_raw_samples(clean_samples, data, self.sample_size)
