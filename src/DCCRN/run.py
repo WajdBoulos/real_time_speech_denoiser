@@ -11,11 +11,11 @@ from data import AudioDataset, AudioDataLoader
 # I'm using the Interspeech 2020 DNS Challenge Dataset. Dataset is put in egs/SE_dataset/tr and is organized as
 # folders mix/clean/noise.
 
-# To open visdom (shows loss graphs), run this command: "python -m visdom.server", and then open in browser
+# To open visdom (shows loss graphs), run this command: "", and then open in browser
 # http://localhost:8097
 
-data_dir = "/media/saba-junior@staff.technion.ac.il/hadas-win/DNS-Challenge/DNS-Challenge/datasets/"
-json_dir = "/media/saba-junior@staff.technion.ac.il/hadas-win/DNS-Challenge/DNS-Challenge/datasets/"
+data_dir = "/home/saba-junior@staff.technion.ac.il/dockertst/"
+json_dir = "/home/saba-junior@staff.technion.ac.il/dockertst/"
 
 #train_dir = data_dir + "tr"
 #valid_dir = data_dir + "cv"
@@ -32,7 +32,7 @@ model_features_path = ""  # i tried playing with a model for a deep feature loss
 
 if __name__ == '__main__':
     sample_rate = 16000
-    preprocess(data_dir, json_dir, sample_rate)
+    #preprocess(data_dir, json_dir, sample_rate)
 
     batch_size = 4
     max_hours = None  # only use some of the data for tests. should be None when running on full dataset

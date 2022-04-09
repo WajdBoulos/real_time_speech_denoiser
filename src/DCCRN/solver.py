@@ -264,6 +264,7 @@ class Solver(object):
             vis_iters = torch.arange(1, len(data_loader) + 1)
             vis_iters_loss = torch.Tensor(len(data_loader))
         i = 0
+        num_nan_loss = 0
         for (data_package) in tqdm(data_loader):
             padded_mixture, mixture_lengths, padded_clean_noise = data_package
             if self.use_cuda:
@@ -290,6 +291,14 @@ class Solver(object):
 
             source = padded_clean_noise[:, 0, :]  # first arg is source, second is noise
             loss = cal_loss(source, estimate_source, mixture_lengths, device, features_model=self.deep_features_model)
+
+            if True in torch.isnan(loss):
+                if (num_nan_loss == 0) or (i % 10000 == 0):
+                    print("estimate_source: ", estimate_source)
+                    print("source: ", source)
+                    print("mixture_lengths: ", mixture_lengths)
+                num_nan_loss = num_nan_loss + 1
+
             if not cross_valid:
                 self.optimizer.zero_grad()
                 loss.backward()

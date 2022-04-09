@@ -1,0 +1,9 @@
+num of workers,num of files processed in first 90 sec
+0,40
+1,85
+2,90
+4,90
+6,89
+8,89
+16,85
+32,78

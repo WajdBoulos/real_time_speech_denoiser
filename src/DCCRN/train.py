@@ -48,7 +48,7 @@ def train(data_dir, epochs, batch_size, model_path, model_features_path, max_hou
     num_workers = 4
     # optimizer
     optimizer_type = "adam"
-    lr = 1e-3
+    lr = 5e-4
     momentum = 0
     l2 = 0  # Weight decay - l2 norm
 
@@ -56,9 +56,9 @@ def train(data_dir, epochs, batch_size, model_path, model_features_path, max_hou
     save_folder = "../egs/models"
     enable_checkpoint = 0  # enables saving checkpoints
     print_freq = 100
-    visdom_enabled = 0
-    visdom_epoch = 0
-    visdom_id = "Conv-TasNet Training"  # TODO: Check what this does
+    visdom_enabled = 1
+    visdom_epoch = 1
+    visdom_id = "FullSubnet Training"  # TODO: Check what this does
 
     # deep_features_model = DeepSpeech.load_model(model_features_path)
     # deep_features_model.eval()

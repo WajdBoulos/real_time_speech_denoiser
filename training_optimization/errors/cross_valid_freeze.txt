@@ -1,0 +1,42 @@
+/home/saba-junior@staff.technion.ac.il/.conda/envs/dns_project/bin/python /home/saba-junior@staff.technion.ac.il/PycharmProjects/real_time_speech_denoiser/src/DCCRN/run.py
+Dropped 0 utts(0.00 h) which are shorter than 64000 samples
+60001 utts, total number of undropped hours: 500.01 hours
+Training...
+  0%|          | 0/48001 [00:00<?, ?it/s]/home/saba-junior@staff.technion.ac.il/.conda/envs/dns_project/lib/python3.8/site-packages/torch/functional.py:654: UserWarning: istft will require a complex-valued input tensor in a future PyTorch release. Matching the output from stft with return_complex=True.  (Triggered internally at  /opt/conda/conda-bld/pytorch_1616554788289/work/aten/src/ATen/native/SpectralOps.cpp:787.)
+  return _VF.istft(input, n_fft, hop_length, win_length, window, center,  # type: ignore
+100%|██████████| 48001/48001 [8:49:49<00:00,  1.51it/s]
+  0%|          | 0/12000 [00:00<?, ?it/s]-------------------------------------------------------------------------------------
+Train Summary | End of Epoch 1 | Time 31789.47s | Train Loss -20.381
+-------------------------------------------------------------------------------------
+Cross validation...
+  0%|          | 0/12000 [14:36<?, ?it/s]
+Traceback (most recent call last):
+  File "/home/saba-junior@staff.technion.ac.il/PycharmProjects/real_time_speech_denoiser/src/DCCRN/run.py", line 40, in <module>
+    train(data_dir, epochs, batch_size, model_path, model_features_path, max_hours=max_hours,
+  File "/home/saba-junior@staff.technion.ac.il/PycharmProjects/real_time_speech_denoiser/src/DCCRN/train.py", line 127, in train
+    solver.train()
+  File "/home/saba-junior@staff.technion.ac.il/PycharmProjects/real_time_speech_denoiser/src/DCCRN/solver.py", line 193, in train
+    val_loss = self._run_one_epoch(epoch, self.device, cross_valid=True)
+  File "/home/saba-junior@staff.technion.ac.il/PycharmProjects/real_time_speech_denoiser/src/DCCRN/solver.py", line 267, in _run_one_epoch
+    for (data_package) in tqdm(data_loader):
+  File "/home/saba-junior@staff.technion.ac.il/.conda/envs/dns_project/lib/python3.8/site-packages/tqdm/std.py", line 1180, in __iter__
+    for obj in iterable:
+  File "/home/saba-junior@staff.technion.ac.il/.conda/envs/dns_project/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 517, in __next__
+    data = self._next_data()
+  File "/home/saba-junior@staff.technion.ac.il/.conda/envs/dns_project/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1182, in _next_data
+    idx, data = self._get_data()
+  File "/home/saba-junior@staff.technion.ac.il/.conda/envs/dns_project/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 1148, in _get_data
+    success, data = self._try_get_data()
+  File "/home/saba-junior@staff.technion.ac.il/.conda/envs/dns_project/lib/python3.8/site-packages/torch/utils/data/dataloader.py", line 986, in _try_get_data
+    data = self._data_queue.get(timeout=timeout)
+  File "/home/saba-junior@staff.technion.ac.il/.conda/envs/dns_project/lib/python3.8/multiprocessing/queues.py", line 107, in get
+    if not self._poll(timeout):
+  File "/home/saba-junior@staff.technion.ac.il/.conda/envs/dns_project/lib/python3.8/multiprocessing/connection.py", line 257, in poll
+    return self._poll(timeout)
+  File "/home/saba-junior@staff.technion.ac.il/.conda/envs/dns_project/lib/python3.8/multiprocessing/connection.py", line 424, in _poll
+    r = wait([self], timeout)
+  File "/home/saba-junior@staff.technion.ac.il/.conda/envs/dns_project/lib/python3.8/multiprocessing/connection.py", line 931, in wait
+    ready = selector.select(timeout)
+  File "/home/saba-junior@staff.technion.ac.il/.conda/envs/dns_project/lib/python3.8/selectors.py", line 415, in select
+    fd_event_list = self._selector.poll(timeout)
+KeyboardInterrupt
