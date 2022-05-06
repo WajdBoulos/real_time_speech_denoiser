@@ -4,6 +4,6 @@
         {"type":"DCCRN_processor", "args":{"sample_size":4, "should_overlap":True, "ratio_power":1, "model_path":"models/DCCRN_sr_16k_batch_16_correct_BN_stft_lookahead.pth"}},
     ],
     "writers": [
-        {"type":"file_writer", "args":{"path":"out69.wav", "blocking_time":0.0001}},
+        {"type":"file_writer", "args":{"path":"outMicDccrn.wav", "blocking_time":0.0001}},
     ],
 }
