@@ -1,12 +1,14 @@
 # This file may be used to create an environment using:
-# $ conda create --name <env> --file <this file> -c defaults -c conda-forge -c anaconda -c pytorch
-# platform: win-64
-# After this, you need to install torch_stft from pip:
+# pip install -r requirements.txt
+# If using linux, you may also need to do:
+# sudo apt-get install python3-distutils
+# sudo apt-get install libportaudio2
+
 torch_stft
 
 # For AudioVisualizer
 matplotlib==3.3.2
-numpy==1.21.6
+numpy==1.18.0
 
 # For microphone and speakers
 sounddevice==0.4.1
@@ -16,6 +18,10 @@ pyyaml==5.4.1
 
 # For DCCRN processor
 librosa==0.8.1
+
+#for subnet processor
+toml==0.10.2
+tqdm==4.64.0
 
 torch==1.11.0
 torchvision==0.12.0
@@ -29,7 +35,6 @@ ffmpeg
 pysoundfile
 
 # for training
-#tqdm
 #visdom
 #mir_eval
 #pystoi
