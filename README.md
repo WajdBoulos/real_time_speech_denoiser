@@ -1,3 +1,6 @@
+#Change notes 6/13/2022
+Now all requirements.txt can be installed via pip, no need for conda
+
 # real_time_speech_denoiser
 Real time application to show speech de-noising in action.
 
