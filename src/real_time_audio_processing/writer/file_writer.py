@@ -56,7 +56,7 @@ class FileWriter(Writer):
             data (buffer):        data to write. It is a buffer with length of blocksize*sizeof(dtype).
         """
         if self.wav_format:
-            self.sf.buffer_write(data, self.dtype)
+            self.sf.buffer_write(data, None, self.dtype)
         else:
             self.file.write(data)
 
